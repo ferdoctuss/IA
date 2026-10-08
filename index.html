@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Paul - IA Local</title>
+    <title>Paul - Cloud AI</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="theme-color" content="#131314" id="theme-color-meta">
@@ -19,6 +19,8 @@
             --bubble-user: #0b57d0;
             --bubble-user-text: #ffffff;
             --input-bg: #ffffff;
+            --dropdown-bg: #ffffff;
+            --dropdown-hover: #f1f3f4;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -33,6 +35,8 @@
                 --bubble-user: #004a77;
                 --bubble-user-text: #ffffff;
                 --input-bg: #1e1f20;
+                --dropdown-bg: #1e1f20;
+                --dropdown-hover: #282a2c;
             }
         }
 
@@ -64,6 +68,15 @@
             border-color: var(--border-color);
         }
 
+        .gemini-dropdown {
+            background-color: var(--dropdown-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .gemini-dropdown-item:hover {
+            background-color: var(--dropdown-hover);
+        }
+
         ::-webkit-scrollbar {
             width: 4px;
         }
@@ -86,14 +99,19 @@
             </div>
             <div>
                 <h1 class="text-base font-medium tracking-wide flex items-center gap-2">
-                    Paul <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">Local / IA</span>
+                    Paul <span id="active-model-badge" class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">Gemini Flash</span>
                 </h1>
-                <p id="status" class="text-xs text-[var(--text-secondary)]">Preparando motor...</p>
+                <p class="text-xs text-[var(--text-secondary)]">Asistente personal en la nube</p>
             </div>
         </div>
-        <button onclick="location.reload()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition" title="Reiniciar chat">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-        </button>
+        <div class="flex items-center gap-2">
+            <button onclick="configureKeys()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition text-xs flex items-center gap-1 border border-[var(--border-color)] px-3 py-1 rounded-full" title="Configurar API Keys">
+                🔑 Llaves
+            </button>
+            <button onclick="location.reload()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition" title="Reiniciar chat">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            </button>
+        </div>
     </header>
 
     <!-- Contenedor del Chat -->
@@ -103,88 +121,125 @@
                 P
             </div>
             <div class="gemini-bubble-ai rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed shadow-sm">
-                ¡Hola! Soy <strong>Paul</strong>, tu asistente personal local. Estoy configurando el entorno en tu dispositivo para funcionar sin internet.
+                ¡Hola! Soy <strong>Paul</strong>. Configura tus llaves de API arriba a la derecha con el botón <strong>🔑 Llaves</strong> y podrás alternar entre diferentes modelos al instante desde el menú inferior.
             </div>
         </div>
     </main>
 
-    <!-- Barra de Entrada -->
-    <footer class="p-4 gemini-header border-t flex flex-col items-center transition-colors duration-300">
+    <!-- Barra de Entrada con Selector Estilo Gemini -->
+    <footer class="p-4 gemini-header border-t flex flex-col items-center transition-colors duration-300 relative">
+        
+        <!-- Menú Desplegable de Modelos (Estilo de la foto) -->
+        <div id="model-menu" class="hidden absolute bottom-20 left-4 sm:left-auto gemini-dropdown rounded-2xl shadow-2xl py-2 w-72 z-35 backdrop-blur-md">
+            <div class="px-4 py-2 text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider uppercase border-b border-[var(--border-color)]">Seleccionar Modelo</div>
+            
+            <div onclick="selectModel('gemini', 'gemini-2.5-flash', 'Gemini Flash')" class="gemini-dropdown-item px-4 py-3 cursor-pointer flex items-center justify-between transition">
+                <div>
+                    <div class="text-sm font-medium text-[var(--text-main)]">Gemini Flash</div>
+                    <div class="text-xs text-[var(--text-secondary)]">Respuestas rápidas y estables</div>
+                </div>
+                <span id="check-gemini-2-5-flash" class="text-blue-500 font-bold">✓</span>
+            </div>
+
+            <div onclick="selectModel('groq', 'llama-3.3-70b-versatile', 'Llama 3.3 (Groq)')" class="gemini-dropdown-item px-4 py-3 cursor-pointer flex items-center justify-between transition">
+                <div>
+                    <div class="text-sm font-medium text-[var(--text-main)]">Llama 3.3 70B (Groq)</div>
+                    <div class="text-xs text-[var(--text-secondary)]">Potencia abierta ultrarrápida</div>
+                </div>
+                <span id="check-llama-3-3-70b-versatile" class="text-blue-500 font-bold hidden">✓</span>
+            </div>
+        </div>
+
         <form id="chat-form" class="gemini-input-container w-full max-w-3xl border rounded-3xl px-4 py-2 flex items-center gap-3 focus-within:border-blue-500 transition shadow-lg">
+            
+            <!-- Botón Estilo Selector de Modelo -->
+            <button type="button" id="model-selector-btn" onclick="toggleModelMenu(event)" class="flex items-center gap-1.5 bg-[var(--dropdown-hover)] hover:opacity-80 text-[var(--text-main)] text-xs font-medium py-2 px-3 rounded-full transition flex-shrink-0">
+                <span id="current-model-label">Gemini Flash</span>
+                <svg class="w-3.5 h-3.5 text-[var(--text-secondary)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+
             <input 
                 type="text" 
                 id="user-input" 
                 placeholder="Pregúntale a Paul..." 
                 autocomplete="off"
-                disabled
-                class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-sm focus:outline-none py-2 px-1 disabled:opacity-50"
+                class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-sm focus:outline-none py-2 px-1"
             >
+
             <button 
                 type="submit" 
                 id="send-btn"
-                disabled
-                class="bg-blue-600 hover:bg-blue-500 text-white p-2.5 rounded-full transition disabled:opacity-30 disabled:hover:bg-blue-600 flex items-center justify-center shadow"
+                class="bg-blue-600 hover:bg-blue-500 text-white p-2.5 rounded-full transition flex items-center justify-center shadow flex-shrink-0"
             >
                 <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-7 7m7-7l7 7"></path></svg>
             </button>
         </form>
-        <p class="text-[11px] text-[var(--text-secondary)] mt-2 text-center">Ejecutándose localmente en tu dispositivo.</p>
+        <p class="text-[11px] text-[var(--text-secondary)] mt-2 text-center">Conectado mediante API segura en la nube.</p>
     </footer>
 
-    <!-- Script de Integración Robusta -->
-    <script type="module">
-        import { CreateWebWorkerMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
-
-        const statusText = document.getElementById("status");
+    <!-- Script de Gestión y Conexión a APIs -->
+    <script>
         const chatContainer = document.getElementById("chat-container");
         const chatForm = document.getElementById("chat-form");
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
+        const modelMenu = document.getElementById("model-menu");
+        const currentModelLabel = document.getElementById("current-model-label");
+        const activeModelBadge = document.getElementById("active-model-badge");
 
-        const selectedModel = "Llama-3.2-3B-Instruct-q4f32_1-MLC";
-        let engine;
+        // Estado actual del modelo
+        let currentProvider = localStorage.getItem('paul_provider') || 'gemini';
+        let currentModelId = localStorage.getItem('paul_model_id') || 'gemini-2.5-flash';
+        let currentModelName = localStorage.getItem('paul_model_name') || 'Gemini Flash';
 
-        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        function updateThemeColor(e) {
-            document.getElementById('theme-color-meta').setAttribute('content', e.matches ? '#131314' : '#f8f9fa');
+        updateMenuUI();
+
+        function toggleModelMenu(e) {
+            e.stopPropagation();
+            modelMenu.classList.toggle('hidden');
         }
-        darkModeMediaQuery.addEventListener('change', updateThemeColor);
-        updateThemeColor(darkModeMediaQuery);
 
-        async function initEngine() {
-            try {
-                statusText.innerText = "Conectando con el motor local...";
-                
-                // Configuración de app con manejo de reintento/fallbacks automáticos del motor
-                engine = await CreateWebWorkerMLCEngine(
-                    new URL('./worker.js', import.meta.url),
-                    selectedModel,
-                    {
-                        initProgressCallback: (progress) => {
-                            statusText.innerText = progress.text;
-                        }
-                    }
-                );
-
-                statusText.innerText = "Paul está listo (Offline)";
-                statusText.classList.remove("text-[var(--text-secondary)]");
-                statusText.classList.add("text-emerald-500");
-                
-                userInput.disabled = false;
-                sendBtn.disabled = false;
-                userInput.placeholder = "Pregúntale a Paul...";
-                userInput.focus();
-            } catch (err) {
-                console.error(err);
-                statusText.innerText = "Error al iniciar motor en este navegador.";
-                statusText.classList.add("text-rose-500");
-                appendMessage('bot', "Lo siento, tu versión actual de iOS Safari restringe el uso directo de la GPU para IA web en esta vista. Te sugiero verificar si hay actualizaciones pendientes de iOS en Ajustes > General > Actualización de software.");
+        document.addEventListener('click', () => {
+            if (!modelMenu.classList.contains('hidden')) {
+                modelMenu.classList.add('hidden');
             }
+        });
+
+        function selectModel(provider, modelId, modelName) {
+            currentProvider = provider;
+            currentModelId = modelId;
+            currentModelName = modelName;
+
+            localStorage.setItem('paul_provider', provider);
+            localStorage.setItem('paul_model_id', modelId);
+            localStorage.setItem('paul_model_name', modelName);
+
+            currentModelLabel.innerText = modelName;
+            activeModelBadge.innerText = modelName;
+            modelMenu.classList.add('hidden');
+            updateMenuUI();
+        }
+
+        function updateMenuUI() {
+            currentModelLabel.innerText = currentModelName;
+            activeModelBadge.innerText = currentModelName;
+            document.querySelectorAll('[id^="check-"]').forEach(el => el.classList.add('hidden'));
+            const activeCheck = document.getElementById(`check-${currentModelId.replace(/\./g, '-')}`);
+            if (activeCheck) activeCheck.classList.remove('hidden');
+        }
+
+        function configureKeys() {
+            const geminiKey = prompt("Ingresa tu API Key de Google Gemini (AI Studio):", localStorage.getItem('paul_gemini_key') || '');
+            if (geminiKey !== null) localStorage.setItem('paul_gemini_key', geminiKey.trim());
+
+            const groqKey = prompt("Ingresa tu API Key de Groq (Opcional):", localStorage.getItem('paul_groq_key') || '');
+            if (groqKey !== null) localStorage.setItem('paul_groq_key', groqKey.trim());
+
+            alert("¡Llaves guardadas correctamente en tu navegador!");
         }
 
         function appendMessage(sender, text) {
             const isUser = sender === 'user';
-            
             const row = document.createElement('div');
             row.className = `flex items-start gap-3 w-full ${isUser ? 'justify-end' : 'justify-start'}`;
             
@@ -197,9 +252,7 @@
 
             const bubble = document.createElement('div');
             bubble.className = `rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed shadow-sm ${
-                isUser 
-                    ? 'gemini-bubble-user rounded-br-sm' 
-                    : 'gemini-bubble-ai rounded-bl-sm'
+                isUser ? 'gemini-bubble-user rounded-br-sm' : 'gemini-bubble-ai rounded-bl-sm'
             }`;
             bubble.innerText = text;
             
@@ -212,35 +265,63 @@
         chatForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const text = userInput.value.trim();
-            if (!text || !engine) return;
+            if (!text) return;
 
             userInput.value = "";
-            userInput.disabled = true;
-            sendBtn.disabled = true;
-
             appendMessage('user', text);
-
             const botBubble = appendMessage('bot', 'Pensando...');
 
             try {
-                const messages = [
-                    { role: "system", content: "Eres Paul, un asistente personal inteligente, útil, directo y amigable que se ejecuta localmente en el dispositivo del usuario." },
-                    { role: "user", content: text }
-                ];
+                let replyText = "";
 
-                const reply = await engine.chat.completion({ messages });
-                botBubble.innerText = reply.choices[0].message.content;
+                if (currentProvider === 'gemini') {
+                    const apiKey = localStorage.getItem('paul_gemini_key');
+                    if (!apiKey) {
+                        throw new Error("Falta configurar tu API Key de Gemini. Haz clic arriba en '🔑 Llaves'.");
+                    }
+
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModelId}:generateContent?key=${apiKey}`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: text }] }]
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error.message);
+                    replyText = data.candidates[0].content.parts[0].text;
+
+                } else if (currentProvider === 'groq') {
+                    const apiKey = localStorage.getItem('paul_groq_key');
+                    if (!apiKey) {
+                        throw new Error("Falta configurar tu API Key de Groq. Haz clic arriba en '🔑 Llaves'.");
+                    }
+
+                    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: currentModelId,
+                            messages: [{ role: "user", content: text }]
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error.message);
+                    replyText = data.choices[0].message.content;
+                }
+
+                botBubble.innerText = replyText;
             } catch (err) {
                 console.error(err);
-                botBubble.innerText = "Ocurrió un error al generar la respuesta.";
-            } finally {
-                userInput.disabled = false;
-                sendBtn.disabled = false;
-                userInput.focus();
+                botBubble.innerText = "Error: " + err.message;
             }
         });
-
-        initEngine();
     </script>
 </body>
 </html>
