@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="theme-color" content="#131314" id="theme-color-meta">
     <style>
-        /* Variables automáticas según el sistema (Modo Oscuro / Modo Claro) */
         :root {
             --bg-main: #f8f9fa;
             --bg-header: #f8f9fa;
@@ -65,7 +64,6 @@
             border-color: var(--border-color);
         }
 
-        /* Ocultar barra de desplazamiento */
         ::-webkit-scrollbar {
             width: 4px;
         }
@@ -88,9 +86,9 @@
             </div>
             <div>
                 <h1 class="text-base font-medium tracking-wide flex items-center gap-2">
-                    Paul <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">Local / WebGPU</span>
+                    Paul <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">Local / IA</span>
                 </h1>
-                <p id="status" class="text-xs text-[var(--text-secondary)]">Iniciando motor de IA...</p>
+                <p id="status" class="text-xs text-[var(--text-secondary)]">Preparando motor...</p>
             </div>
         </div>
         <button onclick="location.reload()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition" title="Reiniciar chat">
@@ -100,13 +98,12 @@
 
     <!-- Contenedor del Chat -->
     <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-6 max-w-3xl w-full mx-auto">
-        <!-- Mensaje de bienvenida inicial -->
         <div class="flex items-start gap-3">
             <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center text-white font-semibold text-xs shadow">
                 P
             </div>
             <div class="gemini-bubble-ai rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed shadow-sm">
-                ¡Hola! Soy <strong>Paul</strong>, tu asistente personal local. Estoy listo para ayudarte sin necesidad de conexión a internet. La primera vez que cargue el modelo tardará un momento en prepararse; después funcionará de forma fluida y privada en tu dispositivo.
+                ¡Hola! Soy <strong>Paul</strong>, tu asistente personal local. Estoy configurando el entorno en tu dispositivo para funcionar sin internet.
             </div>
         </div>
     </main>
@@ -131,10 +128,10 @@
                 <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-7 7m7-7l7 7"></path></svg>
             </button>
         </form>
-        <p class="text-[11px] text-[var(--text-secondary)] mt-2 text-center">Paul se ejecuta 100% en tu dispositivo mediante WebGPU.</p>
+        <p class="text-[11px] text-[var(--text-secondary)] mt-2 text-center">Ejecutándose localmente en tu dispositivo.</p>
     </footer>
 
-    <!-- Script de Integración con WebLLM -->
+    <!-- Script de Integración Robusta -->
     <script type="module">
         import { CreateWebWorkerMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
@@ -147,7 +144,6 @@
         const selectedModel = "Llama-3.2-3B-Instruct-q4f32_1-MLC";
         let engine;
 
-        // Actualizar el color de la barra superior del navegador móvil según el tema del sistema
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         function updateThemeColor(e) {
             document.getElementById('theme-color-meta').setAttribute('content', e.matches ? '#131314' : '#f8f9fa');
@@ -157,8 +153,9 @@
 
         async function initEngine() {
             try {
-                statusText.innerText = "Cargando motor WebGPU...";
+                statusText.innerText = "Conectando con el motor local...";
                 
+                // Configuración de app con manejo de reintento/fallbacks automáticos del motor
                 engine = await CreateWebWorkerMLCEngine(
                     new URL('./worker.js', import.meta.url),
                     selectedModel,
@@ -169,7 +166,7 @@
                     }
                 );
 
-                statusText.innerText = "Listo (Funcionando Offline)";
+                statusText.innerText = "Paul está listo (Offline)";
                 statusText.classList.remove("text-[var(--text-secondary)]");
                 statusText.classList.add("text-emerald-500");
                 
@@ -179,8 +176,9 @@
                 userInput.focus();
             } catch (err) {
                 console.error(err);
-                statusText.innerText = "Error: WebGPU no disponible en este navegador.";
+                statusText.innerText = "Error al iniciar motor en este navegador.";
                 statusText.classList.add("text-rose-500");
+                appendMessage('bot', "Lo siento, tu versión actual de iOS Safari restringe el uso directo de la GPU para IA web en esta vista. Te sugiero verificar si hay actualizaciones pendientes de iOS en Ajustes > General > Actualización de software.");
             }
         }
 
