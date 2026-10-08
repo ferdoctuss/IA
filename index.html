@@ -1,53 +1,140 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FER AI - Local</title>
-    <!-- Tailwind CSS para un diseño limpio y moderno -->
+    <title>Paul - IA Local</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#131314" id="theme-color-meta">
+    <style>
+        /* Variables automáticas según el sistema (Modo Oscuro / Modo Claro) */
+        :root {
+            --bg-main: #f8f9fa;
+            --bg-header: #f8f9fa;
+            --border-color: #dadce0;
+            --text-main: #1f1f1f;
+            --text-secondary: #5f6368;
+            --bubble-ai: #f0f4f9;
+            --bubble-ai-border: #d3e3fd;
+            --bubble-user: #0b57d0;
+            --bubble-user-text: #ffffff;
+            --input-bg: #ffffff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-main: #131314;
+                --bg-header: #131314;
+                --border-color: #3c4043;
+                --text-main: #e3e3e3;
+                --text-secondary: #9aa0a6;
+                --bubble-ai: #1e1f20;
+                --bubble-ai-border: #3c4043;
+                --bubble-user: #004a77;
+                --bubble-user-text: #ffffff;
+                --input-bg: #1e1f20;
+            }
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .gemini-header {
+            background-color: var(--bg-header);
+            border-color: var(--border-color);
+        }
+
+        .gemini-bubble-ai {
+            background-color: var(--bubble-ai);
+            border: 1px solid var(--bubble-ai-border);
+            color: var(--text-main);
+        }
+
+        .gemini-bubble-user {
+            background-color: var(--bubble-user);
+            color: var(--bubble-user-text);
+        }
+
+        .gemini-input-container {
+            background-color: var(--input-bg);
+            border-color: var(--border-color);
+        }
+
+        /* Ocultar barra de desplazamiento */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 h-screen flex flex-col justify-between overflow-hidden">
+<body class="h-full flex flex-col justify-between overflow-hidden">
 
     <!-- Cabecera -->
-    <header class="bg-slate-800 border-b border-slate-700 p-4 text-center shadow-md">
-        <h1 class="text-lg font-bold tracking-wider text-sky-400">FER AI <span class="text-xs font-normal bg-sky-900 text-sky-200 py-0.5 px-2 rounded-full ml-2">Local / WebGPU</span></h1>
-        <p id="status" class="text-xs text-slate-400 mt-1">Iniciando motor de IA...</p>
+    <header class="gemini-header flex items-center justify-between px-4 py-3 border-b select-none z-10 transition-colors duration-300">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                P
+            </div>
+            <div>
+                <h1 class="text-base font-medium tracking-wide flex items-center gap-2">
+                    Paul <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">Local / WebGPU</span>
+                </h1>
+                <p id="status" class="text-xs text-[var(--text-secondary)]">Iniciando motor de IA...</p>
+            </div>
+        </div>
+        <button onclick="location.reload()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition" title="Reiniciar chat">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        </button>
     </header>
 
     <!-- Contenedor del Chat -->
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4">
-        <div class="flex justify-start">
-            <div class="bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl px-4 py-3 max-w-[85%] text-sm shadow">
-                ¡Hola! Soy tu IA local ejecutándose directamente en tu dispositivo. La primera vez que cargue el modelo tardará un momento en descargarse en la memoria de tu navegador; después funcionará de manera local.
+    <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-6 max-w-3xl w-full mx-auto">
+        <!-- Mensaje de bienvenida inicial -->
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center text-white font-semibold text-xs shadow">
+                P
+            </div>
+            <div class="gemini-bubble-ai rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed shadow-sm">
+                ¡Hola! Soy <strong>Paul</strong>, tu asistente personal local. Estoy listo para ayudarte sin necesidad de conexión a internet. La primera vez que cargue el modelo tardará un momento en prepararse; después funcionará de forma fluida y privada en tu dispositivo.
             </div>
         </div>
     </main>
 
     <!-- Barra de Entrada -->
-    <footer class="bg-slate-800 border-t border-slate-700 p-3">
-        <form id="chat-form" class="flex gap-2 max-w-4xl mx-auto">
+    <footer class="p-4 gemini-header border-t flex flex-col items-center transition-colors duration-300">
+        <form id="chat-form" class="gemini-input-container w-full max-w-3xl border rounded-3xl px-4 py-2 flex items-center gap-3 focus-within:border-blue-500 transition shadow-lg">
             <input 
                 type="text" 
                 id="user-input" 
-                placeholder="Escribe un mensaje..." 
+                placeholder="Pregúntale a Paul..." 
                 autocomplete="off"
                 disabled
-                class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-sky-500 disabled:opacity-50"
+                class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-sm focus:outline-none py-2 px-1 disabled:opacity-50"
             >
             <button 
                 type="submit" 
                 id="send-btn"
                 disabled
-                class="bg-sky-600 hover:bg-sky-500 text-white px-5 py-3 rounded-xl text-sm font-medium transition disabled:opacity-50 shadow"
+                class="bg-blue-600 hover:bg-blue-500 text-white p-2.5 rounded-full transition disabled:opacity-30 disabled:hover:bg-blue-600 flex items-center justify-center shadow"
             >
-                Enviar
+                <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-7 7m7-7l7 7"></path></svg>
             </button>
         </form>
+        <p class="text-[11px] text-[var(--text-secondary)] mt-2 text-center">Paul se ejecuta 100% en tu dispositivo mediante WebGPU.</p>
     </footer>
 
-    <!-- Importar WebLLM mediante ES Modules -->
+    <!-- Script de Integración con WebLLM -->
     <script type="module">
         import { CreateWebWorkerMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
@@ -57,15 +144,21 @@
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
 
-        // Usaremos Llama-3.2-3B-Instruct que es ideal para dispositivos móviles
         const selectedModel = "Llama-3.2-3B-Instruct-q4f32_1-MLC";
         let engine;
+
+        // Actualizar el color de la barra superior del navegador móvil según el tema del sistema
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        function updateThemeColor(e) {
+            document.getElementById('theme-color-meta').setAttribute('content', e.matches ? '#131314' : '#f8f9fa');
+        }
+        darkModeMediaQuery.addEventListener('change', updateThemeColor);
+        updateThemeColor(darkModeMediaQuery);
 
         async function initEngine() {
             try {
                 statusText.innerText = "Cargando motor WebGPU...";
                 
-                // Inicializar el motor con callback para mostrar el progreso de descarga
                 engine = await CreateWebWorkerMLCEngine(
                     new URL('./worker.js', import.meta.url),
                     selectedModel,
@@ -76,36 +169,44 @@
                     }
                 );
 
-                statusText.innerText = "IA lista (Local)";
-                statusText.classList.remove("text-slate-400");
-                statusText.classList.add("text-emerald-400");
+                statusText.innerText = "Listo (Funcionando Offline)";
+                statusText.classList.remove("text-[var(--text-secondary)]");
+                statusText.classList.add("text-emerald-500");
                 
                 userInput.disabled = false;
                 sendBtn.disabled = false;
-                userInput.placeholder = "Escribe un mensaje...";
+                userInput.placeholder = "Pregúntale a Paul...";
+                userInput.focus();
             } catch (err) {
                 console.error(err);
-                statusText.innerText = "Error: WebGPU no disponible o compatible.";
-                statusText.classList.add("text-rose-400");
+                statusText.innerText = "Error: WebGPU no disponible en este navegador.";
+                statusText.classList.add("text-rose-500");
             }
         }
 
-        // Función auxiliar para agregar mensajes a la interfaz
         function appendMessage(sender, text) {
             const isUser = sender === 'user';
-            const wrapper = document.createElement('div');
-            wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
             
+            const row = document.createElement('div');
+            row.className = `flex items-start gap-3 w-full ${isUser ? 'justify-end' : 'justify-start'}`;
+            
+            if (!isUser) {
+                const avatar = document.createElement('div');
+                avatar.className = "w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center text-white font-semibold text-xs shadow";
+                avatar.innerText = "P";
+                row.appendChild(avatar);
+            }
+
             const bubble = document.createElement('div');
-            bubble.className = `rounded-2xl px-4 py-3 max-w-[85%] text-sm shadow ${
+            bubble.className = `rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed shadow-sm ${
                 isUser 
-                    ? 'bg-sky-600 text-white rounded-br-sm' 
-                    : 'bg-slate-800 border border-slate-700 text-slate-200 rounded-bl-sm'
+                    ? 'gemini-bubble-user rounded-br-sm' 
+                    : 'gemini-bubble-ai rounded-bl-sm'
             }`;
             bubble.innerText = text;
             
-            wrapper.appendChild(bubble);
-            chatContainer.appendChild(wrapper);
+            row.appendChild(bubble);
+            chatContainer.appendChild(row);
             chatContainer.scrollTop = chatContainer.scrollHeight;
             return bubble;
         }
@@ -121,12 +222,11 @@
 
             appendMessage('user', text);
 
-            // Crear burbuja vacía para la respuesta del bot
             const botBubble = appendMessage('bot', 'Pensando...');
 
             try {
                 const messages = [
-                    { role: "system", content: "Eres FER AI, un asistente personal útil y directo." },
+                    { role: "system", content: "Eres Paul, un asistente personal inteligente, útil, directo y amigable que se ejecuta localmente en el dispositivo del usuario." },
                     { role: "user", content: text }
                 ];
 
@@ -142,7 +242,6 @@
             }
         });
 
-        // Arrancar la carga al abrir la página
         initEngine();
     </script>
 </body>
