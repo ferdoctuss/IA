@@ -94,9 +94,7 @@
     <!-- Cabecera -->
     <header class="gemini-header flex items-center justify-between px-4 py-3 border-b select-none z-10 transition-colors duration-300">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                P
-            </div>
+            <img src="logo.jpg" alt="Paul Logo" class="w-8 h-8 rounded-full object-cover shadow-md border border-[var(--border-color)]">
             <div>
                 <h1 class="text-base font-medium tracking-wide flex items-center gap-2">
                     Paul <span id="active-model-badge" class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">Gemini Flash</span>
@@ -117,9 +115,7 @@
     <!-- Contenedor del Chat -->
     <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-6 max-w-3xl w-full mx-auto">
         <div class="flex items-start gap-3">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center text-white font-semibold text-xs shadow">
-                P
-            </div>
+            <img src="logo.jpg" alt="Paul" class="w-8 h-8 rounded-full object-cover flex-shrink-0 shadow border border-[var(--border-color)]">
             <div class="gemini-bubble-ai rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed shadow-sm">
                 ¡Hola! Soy <strong>Paul</strong>. Configura tus llaves de API arriba a la derecha con el botón <strong>🔑 Llaves</strong> y podrás alternar entre diferentes modelos al instante desde el menú inferior.
             </div>
@@ -129,7 +125,7 @@
     <!-- Barra de Entrada con Selector Estilo Gemini -->
     <footer class="p-4 gemini-header border-t flex flex-col items-center transition-colors duration-300 relative">
         
-        <!-- Menú Desplegable de Modelos (Estilo de la foto) -->
+        <!-- Menú Desplegable de Modelos -->
         <div id="model-menu" class="hidden absolute bottom-20 left-4 sm:left-auto gemini-dropdown rounded-2xl shadow-2xl py-2 w-72 z-35 backdrop-blur-md">
             <div class="px-4 py-2 text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider uppercase border-b border-[var(--border-color)]">Seleccionar Modelo</div>
             
@@ -152,7 +148,7 @@
 
         <form id="chat-form" class="gemini-input-container w-full max-w-3xl border rounded-3xl px-4 py-2 flex items-center gap-3 focus-within:border-blue-500 transition shadow-lg">
             
-            <!-- Botón Estilo Selector de Modelo -->
+            <!-- Botón Selector de Modelo -->
             <button type="button" id="model-selector-btn" onclick="toggleModelMenu(event)" class="flex items-center gap-1.5 bg-[var(--dropdown-hover)] hover:opacity-80 text-[var(--text-main)] text-xs font-medium py-2 px-3 rounded-full transition flex-shrink-0">
                 <span id="current-model-label">Gemini Flash</span>
                 <svg class="w-3.5 h-3.5 text-[var(--text-secondary)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
@@ -177,7 +173,7 @@
         <p class="text-[11px] text-[var(--text-secondary)] mt-2 text-center">Conectado mediante API segura en la nube.</p>
     </footer>
 
-    <!-- Script de Gestión y Conexión a APIs -->
+    <!-- Script de Gestión -->
     <script>
         const chatContainer = document.getElementById("chat-container");
         const chatForm = document.getElementById("chat-form");
@@ -187,12 +183,18 @@
         const currentModelLabel = document.getElementById("current-model-label");
         const activeModelBadge = document.getElementById("active-model-badge");
 
-        // Estado actual del modelo
         let currentProvider = localStorage.getItem('paul_provider') || 'gemini';
         let currentModelId = localStorage.getItem('paul_model_id') || 'gemini-2.5-flash';
         let currentModelName = localStorage.getItem('paul_model_name') || 'Gemini Flash';
 
         updateMenuUI();
+
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        function updateThemeColor(e) {
+            document.getElementById('theme-color-meta').setAttribute('content', e.matches ? '#131314' : '#f8f9fa');
+        }
+        darkModeMediaQuery.addEventListener('change', updateThemeColor);
+        updateThemeColor(darkModeMediaQuery);
 
         function toggleModelMenu(e) {
             e.stopPropagation();
@@ -244,9 +246,9 @@
             row.className = `flex items-start gap-3 w-full ${isUser ? 'justify-end' : 'justify-start'}`;
             
             if (!isUser) {
-                const avatar = document.createElement('div');
-                avatar.className = "w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center text-white font-semibold text-xs shadow";
-                avatar.innerText = "P";
+                const avatar = document.createElement('img');
+                avatar.src = "logo.jpg";
+                avatar.className = "w-8 h-8 rounded-full object-cover flex-shrink-0 shadow border border-[var(--border-color)]";
                 row.appendChild(avatar);
             }
 
