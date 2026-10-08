@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FER AI - Local</title>
+    <!-- Tailwind CSS para un diseño limpio y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="theme-color" content="#0f172a">
+</head>
+<body class="bg-slate-900 text-slate-100 h-screen flex flex-col justify-between overflow-hidden">
+
+    <!-- Cabecera -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 text-center shadow-md">
+        <h1 class="text-lg font-bold tracking-wider text-sky-400">FER AI <span class="text-xs font-normal bg-sky-900 text-sky-200 py-0.5 px-2 rounded-full ml-2">Local / WebGPU</span></h1>
+        <p id="status" class="text-xs text-slate-400 mt-1">Iniciando motor de IA...</p>
+    </header>
+
+    <!-- Contenedor del Chat -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <div class="flex justify-start">
+            <div class="bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl px-4 py-3 max-w-[85%] text-sm shadow">
+                ¡Hola! Soy tu IA local ejecutándose directamente en tu dispositivo. La primera vez que cargue el modelo tardará un momento en descargarse en la memoria de tu navegador; después funcionará de manera local.
+            </div>
+        </div>
+    </main>
+
+    <!-- Barra de Entrada -->
+    <footer class="bg-slate-800 border-t border-slate-700 p-3">
+        <form id="chat-form" class="flex gap-2 max-w-4xl mx-auto">
+            <input 
+                type="text" 
+                id="user-input" 
+                placeholder="Escribe un mensaje..." 
+                autocomplete="off"
+                disabled
+                class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-sky-500 disabled:opacity-50"
+            >
+            <button 
+                type="submit" 
+                id="send-btn"
+                disabled
+                class="bg-sky-600 hover:bg-sky-500 text-white px-5 py-3 rounded-xl text-sm font-medium transition disabled:opacity-50 shadow"
+            >
+                Enviar
+            </button>
+        </form>
+    </footer>
+
+    <!-- Importar WebLLM mediante ES Modules -->
+    <script type="module">
+        import { CreateWebWorkerMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
+
+        const statusText = document.getElementById("status");
+        const chatContainer = document.getElementById("chat-container");
+        const chatForm = document.getElementById("chat-form");
+        const userInput = document.getElementById("user-input");
+        const sendBtn = document.getElementById("send-btn");
+
+        // Usaremos Llama-3.2-3B-Instruct que es ideal para dispositivos móviles
+        const selectedModel = "Llama-3.2-3B-Instruct-q4f32_1-MLC";
+        let engine;
+
+        async function initEngine() {
+            try {
+                statusText.innerText = "Cargando motor WebGPU...";
+                
+                // Inicializar el motor con callback para mostrar el progreso de descarga
+                engine = await CreateWebWorkerMLCEngine(
+                    new URL('./worker.js', import.meta.url),
+                    selectedModel,
+                    {
+                        initProgressCallback: (progress) => {
+                            statusText.innerText = progress.text;
+                        }
+                    }
+                );
+
+                statusText.innerText = "IA lista (Local)";
+                statusText.classList.remove("text-slate-400");
+                statusText.classList.add("text-emerald-400");
+                
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                userInput.placeholder = "Escribe un mensaje...";
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "Error: WebGPU no disponible o compatible.";
+                statusText.classList.add("text-rose-400");
+            }
+        }
+
+        // Función auxiliar para agregar mensajes a la interfaz
+        function appendMessage(sender, text) {
+            const isUser = sender === 'user';
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = `rounded-2xl px-4 py-3 max-w-[85%] text-sm shadow ${
+                isUser 
+                    ? 'bg-sky-600 text-white rounded-br-sm' 
+                    : 'bg-slate-800 border border-slate-700 text-slate-200 rounded-bl-sm'
+            }`;
+            bubble.innerText = text;
+            
+            wrapper.appendChild(bubble);
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return bubble;
+        }
+
+        chatForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text || !engine) return;
+
+            userInput.value = "";
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+
+            appendMessage('user', text);
+
+            // Crear burbuja vacía para la respuesta del bot
+            const botBubble = appendMessage('bot', 'Pensando...');
+
+            try {
+                const messages = [
+                    { role: "system", content: "Eres FER AI, un asistente personal útil y directo." },
+                    { role: "user", content: text }
+                ];
+
+                const reply = await engine.chat.completion({ messages });
+                botBubble.innerText = reply.choices[0].message.content;
+            } catch (err) {
+                console.error(err);
+                botBubble.innerText = "Ocurrió un error al generar la respuesta.";
+            } finally {
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        });
+
+        // Arrancar la carga al abrir la página
+        initEngine();
+    </script>
+</body>
+</html>
