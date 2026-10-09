@@ -47,12 +47,14 @@
             }
         }
 
-        /* Bloquear zoom por gestos, pellizcos y doble toque en móviles */
+        /* Bloquear completamente zoom, rebotes y desplazamiento horizontal en móviles */
         html, body {
-            touch-action: manipulation;
+            touch-action: pan-y;
             -webkit-text-size-adjust: 100%;
             height: 100%;
+            width: 100%;
             overflow: hidden;
+            position: fixed;
             user-select: none;
             -webkit-user-select: none;
         }
@@ -84,14 +86,35 @@
             border-color: var(--border-color);
         }
 
-        /* Estilos Markdown */
+        /* Estilos Markdown y adaptación estricta a pantallas móviles */
+        .markdown-content {
+            overflow-wrap: break-word;
+            word-break: break-word;
+            max-width: 100%;
+        }
         .markdown-content p { margin-bottom: 0.75rem; }
         .markdown-content p:last-child { margin-bottom: 0; }
         .markdown-content ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
         .markdown-content ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.75rem; }
         .markdown-content li { margin-bottom: 0.25rem; }
         .markdown-content strong { font-weight: 600; }
-        .markdown-content code { background: rgba(0,0,0,0.06); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 85%; }
+        .markdown-content code { background: rgba(0,0,0,0.06); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 85%; word-break: break-all; }
+        
+        /* Ajuste responsivo para tablas grandes */
+        .markdown-content table {
+            width: 100%;
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+            margin-bottom: 0.75rem;
+            border-collapse: collapse;
+        }
+        .markdown-content th, .markdown-content td {
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            font-size: 0.85rem;
+        }
+
         @media (prefers-color-scheme: dark) {
             .markdown-content code { background: rgba(255,255,255,0.1); }
         }
@@ -124,7 +147,7 @@
         }
     </style>
 </head>
-<body class="flex flex-col justify-between h-full relative">
+<body class="flex flex-col justify-between h-full w-full">
 
     <!-- Panel Lateral de Historial (Drawer) -->
     <div id="history-drawer" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden transition-opacity duration-300 flex justify-start">
@@ -148,33 +171,33 @@
     </div>
 
     <!-- Cabecera -->
-    <header class="gemini-header flex items-center justify-between px-4 py-3 border-b select-none z-10 transition-colors duration-300">
+    <header class="gemini-header flex items-center justify-between px-4 py-3 border-b select-none z-10 transition-colors duration-300 flex-shrink-0">
         <div class="flex items-center gap-3">
-            <button onclick="toggleHistoryDrawer()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition" title="Historial">
+            <button onclick="toggleHistoryDrawer()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0" title="Historial">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            <div>
-                <h1 class="text-base font-medium tracking-wide">Paul</h1>
-                <p class="text-xs text-[var(--text-secondary)]">Asistente personal</p>
+            <div class="min-w-0">
+                <h1 class="text-base font-medium tracking-wide truncate">Paul</h1>
+                <p class="text-xs text-[var(--text-secondary)] truncate">Asistente personal ultrarrápido</p>
             </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-shrink-0">
             <button id="keys-btn" onclick="configureKeys()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition text-xs flex items-center gap-1 border border-[var(--border-color)] px-3 py-1 rounded-full hidden" title="Configurar API Key">
                 🔑 Llave
             </button>
-            <button onclick="startNewChat()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition" title="Nuevo chat">
+            <button onclick="startNewChat()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0" title="Nuevo chat">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
             </button>
-            <img src="logo.jpg" alt="Perfil" class="w-10 h-10 rounded-full object-cover shadow-sm border border-[var(--border-color)] cursor-pointer" onclick="configureKeys()" title="Configurar API Key">
+            <img src="logo.jpg" alt="Perfil" class="w-10 h-10 rounded-full object-cover shadow-sm border border-[var(--border-color)] cursor-pointer flex-shrink-0" onclick="configureKeys()" title="Configurar API Key">
         </div>
     </header>
 
-    <!-- Contenedor del Chat -->
-    <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-6 max-w-3xl w-full mx-auto"></main>
+    <!-- Contenedor del Chat (Ajustado para evitar desbordamiento horizontal) -->
+    <main id="chat-container" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 space-y-6 max-w-3xl w-full mx-auto"></main>
 
     <!-- Barra de Entrada Estilo Gemini -->
-    <footer class="p-4 gemini-header flex flex-col items-center transition-colors duration-300 relative">
+    <footer class="p-4 gemini-header flex flex-col items-center transition-colors duration-300 relative flex-shrink-0">
         <form id="chat-form" class="gemini-input-container w-full max-w-3xl border rounded-full px-4 py-2.5 flex items-center gap-3 focus-within:border-blue-500 transition shadow-md">
             
             <input type="file" id="file-input" class="hidden" accept="image/*,.pdf,.txt,.doc,.docx">
@@ -187,7 +210,7 @@
                 id="user-input" 
                 placeholder="Pregúntale a Paul..." 
                 autocomplete="off"
-                class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-sm focus:outline-none py-1.5 px-1"
+                class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-sm focus:outline-none py-1.5 px-1 min-w-0"
             >
 
             <button 
@@ -239,14 +262,7 @@
         darkModeMediaQuery.addEventListener('change', updateThemeColor);
         updateThemeColor(darkModeMediaQuery);
 
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (event) => {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
+        // Bloquear gestos de zoom y desplazamiento horizontal elástico en iOS/Android
         document.addEventListener('gesturestart', (e) => e.preventDefault());
 
         fileInput.addEventListener('change', (e) => {
@@ -286,7 +302,6 @@
         function updateHistoryDrawerList() {
             historyList.innerHTML = '';
             
-            // Si hay chat activo actual, mostrarlo como sesión principal
             if (chatHistory.length > 0) {
                 const currentSessionBtn = document.createElement('div');
                 currentSessionBtn.className = "p-3 rounded-xl bg-black/5 dark:bg-white/5 cursor-pointer text-sm font-medium truncate flex items-center justify-between";
@@ -327,7 +342,6 @@
         function loadSession(idx) {
             const session = sessions[idx];
             if (session) {
-                // Guardar chat actual en sesiones antes de cambiar
                 if (chatHistory.length > 0) {
                     const firstMsg = chatHistory.find(m => m.role === 'user');
                     const title = firstMsg ? firstMsg.content.substring(0, 25) + '...' : 'Chat anterior';
@@ -358,7 +372,7 @@
             if (sender === 'system') return;
 
             const row = document.createElement('div');
-            row.className = `flex items-start gap-3 w-full ${isUser ? 'justify-end' : 'justify-start'}`;
+            row.className = `flex items-start gap-3 w-full max-w-full ${isUser ? 'justify-end' : 'justify-start'}`;
             
             if (!isUser) {
                 const avatar = document.createElement('img');
@@ -368,10 +382,10 @@
             }
 
             const bubbleContainer = document.createElement('div');
-            bubbleContainer.className = `max-w-[85%] flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1.5`;
+            bubbleContainer.className = `max-w-[85%] sm:max-w-[75%] flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1.5 min-w-0`;
 
             const bubble = document.createElement('div');
-            bubble.className = `rounded-2xl px-5 py-4 text-sm leading-relaxed shadow-sm markdown-content ${
+            bubble.className = `rounded-2xl px-5 py-4 text-sm leading-relaxed shadow-sm markdown-content w-full overflow-hidden ${
                 isUser ? 'gemini-bubble-user rounded-br-sm' : 'gemini-bubble-ai rounded-bl-sm'
             }`;
 
@@ -390,6 +404,7 @@
             }
 
             const textNode = document.createElement('div');
+            textNode.className = "w-full overflow-x-auto";
             
             if (isTyping) {
                 textNode.innerHTML = `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
