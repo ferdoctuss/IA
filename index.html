@@ -98,9 +98,9 @@
             <img src="logo.jpg" alt="Paul Logo" class="w-8 h-8 rounded-full object-cover shadow-md border border-[var(--border-color)]">
             <div>
                 <h1 class="text-base font-medium tracking-wide flex items-center gap-2">
-                    Paul <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">IA Cloud</span>
+                    Paul <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20">Groq LPU</span>
                 </h1>
-                <p class="text-xs text-[var(--text-secondary)]">Asistente personal en la nube</p>
+                <p class="text-xs text-[var(--text-secondary)]">Asistente personal ultrarrápido</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
@@ -119,7 +119,7 @@
         <div class="flex items-start gap-3">
             <img src="logo.jpg" alt="Paul" class="w-8 h-8 rounded-full object-cover flex-shrink-0 shadow border border-[var(--border-color)]">
             <div class="gemini-bubble-ai rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed shadow-sm">
-                ¡Hola! Soy <strong>Paul</strong>. Estoy listo para ayudarte con texto, fotos o documentos.
+                ¡Hola! Soy <strong>Paul</strong> impulsado por Groq. Estoy listo para ayudarte con tus consultas.
             </div>
         </div>
     </main>
@@ -161,8 +161,8 @@
         const fileInput = document.getElementById("file-input");
         const fileIndicator = document.getElementById("file-indicator");
 
-        // Modelo de Google AI Studio
-        const selectedModel = "gemini-2.5-flash";
+        // Modelo optimizado y veloz de Groq
+        const selectedModel = "llama-3.3-70b-versatile";
         let attachedFile = null;
 
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -190,21 +190,21 @@
         });
 
         function configureKeys() {
-            const currentKey = localStorage.getItem('paul_gemini_key') || '';
-            const geminiKey = prompt("Ingresa tu API Key de Google Gemini (AI Studio - empieza por AIza):", currentKey);
-            if (geminiKey !== null) {
-                const cleanKey = geminiKey.trim();
+            const currentKey = localStorage.getItem('paul_groq_key') || '';
+            const groqKey = prompt("Ingresa tu API Key de Groq (empieza con gsk_):", currentKey);
+            if (groqKey !== null) {
+                const cleanKey = groqKey.trim();
                 if (cleanKey === '') {
-                    localStorage.removeItem('paul_gemini_key');
+                    localStorage.removeItem('paul_groq_key');
                     alert("Se ha borrado la llave guardada.");
                     return;
                 }
-                if (cleanKey.startsWith('gsk_')) {
-                    alert("⚠️ Esa clave es de Groq (empieza con gsk_). Debes usar una API Key de Google AI Studio (Gemini) que empiece con 'AIza'.");
+                if (!cleanKey.startsWith('gsk_')) {
+                    alert("⚠️ Una clave de Groq válida debe empezar con 'gsk_'. Por favor verifica tu llave.");
                     return;
                 }
-                localStorage.setItem('paul_gemini_key', cleanKey);
-                alert("¡Llave guardada correctamente en tu navegador!");
+                localStorage.setItem('paul_groq_key', cleanKey);
+                alert("¡Llave de Groq guardada correctamente en tu navegador!");
             }
         }
 
@@ -249,23 +249,6 @@
             return bubble;
         }
 
-        function fileToGenerativePart(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const base64Data = reader.result.split(',')[1];
-                    resolve({
-                        inlineData: {
-                            data: base64Data,
-                            mimeType: file.type
-                        }
-                    });
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
         chatForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const text = userInput.value.trim();
@@ -278,40 +261,43 @@
             fileIndicator.classList.add('hidden');
             fileInput.value = "";
 
+            let messageText = text;
+            if (fileToSend) {
+                messageText += ` [Archivo adjunto: ${fileToSend.name}]`;
+            }
+
             appendMessage('user', text || "Analiza este archivo:", fileToSend);
             const botBubble = appendMessage('bot', 'Pensando...');
 
             try {
-                const apiKey = localStorage.getItem('paul_gemini_key');
+                const apiKey = localStorage.getItem('paul_groq_key');
                 if (!apiKey) {
-                    throw new Error("Falta configurar tu API Key. Haz clic arriba en el botón '🔑 Llave' e ingresa tu clave de Google AI Studio.");
+                    throw new Error("Falta configurar tu API Key de Groq. Haz clic arriba en el botón '🔑 Llave' e ingresa tu clave.");
                 }
 
-                let contentsArray = [];
-                let parts = [];
+                // Estructura de mensajes compatible con la API de Groq
+                const messagesArray = [
+                    { role: "system", content: "Eres Paul, un asistente personal útil, directo y amigable." },
+                    { role: "user", content: messageText }
+                ];
 
-                if (text) {
-                    parts.push({ text: text });
-                }
-
-                if (fileToSend) {
-                    const filePart = await fileToGenerativePart(fileToSend);
-                    parts.push(filePart);
-                }
-
-                contentsArray.push({ role: "user", parts: parts });
-
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+                const url = "https://api.groq.com/openai/v1/chat/completions";
                 const response = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: contentsArray })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: selectedModel,
+                        messages: messagesArray
+                    })
                 });
 
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
                 
-                botBubble.innerText = data.candidates[0].content.parts[0].text;
+                botBubble.innerText = data.choices[0].message.content;
             } catch (err) {
                 console.error(err);
                 botBubble.innerText = "Error: " + err.message;
