@@ -44,7 +44,6 @@
             }
         }
 
-        /* Bloquear zoom por gestos en móviles */
         html, body {
             touch-action: manipulation;
             -webkit-text-size-adjust: 100%;
@@ -99,7 +98,7 @@
             <img src="logo.jpg" alt="Paul Logo" class="w-8 h-8 rounded-full object-cover shadow-md border border-[var(--border-color)]">
             <div>
                 <h1 class="text-base font-medium tracking-wide flex items-center gap-2">
-                    Paul <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">Gemini Flash</span>
+                    Paul <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">IA Cloud</span>
                 </h1>
                 <p class="text-xs text-[var(--text-secondary)]">Asistente personal en la nube</p>
             </div>
@@ -124,17 +123,15 @@
         </div>
     </main>
 
-    <!-- Barra de Entrada Compacta y Moderna -->
+    <!-- Barra de Entrada -->
     <footer class="p-3 gemini-header border-t flex flex-col items-center transition-colors duration-300 relative">
         <form id="chat-form" class="gemini-input-container w-full max-w-3xl border rounded-3xl px-3 py-2 flex items-center gap-2 focus-within:border-blue-500 transition shadow-lg">
             
-            <!-- Botón de Adjuntar Archivos / Fotos (+) -->
             <input type="file" id="file-input" class="hidden" accept="image/*,.pdf,.txt,.doc,.docx">
             <button type="button" onclick="document.getElementById('file-input').click()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition flex items-center justify-center flex-shrink-0" title="Adjuntar archivo o foto">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
             </button>
 
-            <!-- Campo de Texto (Ocupa todo el espacio cómodo) -->
             <input 
                 type="text" 
                 id="user-input" 
@@ -143,7 +140,6 @@
                 class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-sm focus:outline-none py-2 px-1"
             >
 
-            <!-- Botón de Envío -->
             <button 
                 type="submit" 
                 id="send-btn"
@@ -165,7 +161,8 @@
         const fileInput = document.getElementById("file-input");
         const fileIndicator = document.getElementById("file-indicator");
 
-        const selectedModel = "gemini-3.8-flash";
+        // Modelo actualizado de Google AI Studio
+        const selectedModel = "gemini-2.5-flash";
         let attachedFile = null;
 
         checkKeysState();
@@ -177,7 +174,6 @@
         darkModeMediaQuery.addEventListener('change', updateThemeColor);
         updateThemeColor(darkModeMediaQuery);
 
-        // Bloquear zoom con doble toque en iOS
         let lastTouchEnd = 0;
         document.addEventListener('touchend', (event) => {
             const now = Date.now();
@@ -207,7 +203,12 @@
         function configureKeys() {
             const geminiKey = prompt("Ingresa tu API Key de Google Gemini (AI Studio):", localStorage.getItem('paul_gemini_key') || '');
             if (geminiKey !== null && geminiKey.trim() !== '') {
-                localStorage.setItem('paul_gemini_key', geminiKey.trim());
+                const cleanKey = geminiKey.trim();
+                if (cleanKey.startsWith('gsk_')) {
+                    alert("⚠️ ¡Cuidado! Esa clave empieza con 'gsk_' y pertenece a Groq. Para esta app necesitas una API Key de Google AI Studio (Gemini).");
+                    return;
+                }
+                localStorage.setItem('paul_gemini_key', cleanKey);
                 checkKeysState();
                 alert("¡Llave guardada correctamente!");
             }
