@@ -178,8 +178,8 @@
         const fileInput = document.getElementById("file-input");
         const fileIndicator = document.getElementById("file-indicator");
 
-        // Modelo veloz y estable de Groq
-        const selectedModel = "llama-3.1-8b-instant";
+        // Modelo actual activo en Groq
+        const selectedModel = "openai/gpt-oss-120b";
         let attachedFile = null;
 
         // Comprobar estado de la llave al cargar la app
@@ -273,7 +273,6 @@
             const textNode = document.createElement('div');
             
             if (isTyping) {
-                // Animación de puntos rebotando
                 textNode.innerHTML = `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
             } else {
                 textNode.innerText = text;
@@ -305,7 +304,6 @@
 
             appendMessage('user', text || "Analiza este archivo:", fileToSend);
             
-            // Mostrar burbuja con animación de pensando
             const botBubbleContainer = appendMessage('bot', '', null, true);
 
             try {
@@ -335,7 +333,6 @@
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
                 
-                // Reemplazar la animación por la respuesta real
                 botBubbleContainer.innerText = data.choices[0].message.content;
             } catch (err) {
                 console.error(err);
