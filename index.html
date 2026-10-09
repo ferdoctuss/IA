@@ -190,7 +190,6 @@
         const selectedModel = "openai/gpt-oss-120b";
         let attachedFile = null;
 
-        // Historial de mensajes guardado localmente
         let chatHistory = JSON.parse(localStorage.getItem('paul_chat_history')) || [];
 
         checkKeysState();
@@ -212,7 +211,6 @@
         darkModeMediaQuery.addEventListener('change', updateThemeColor);
         updateThemeColor(darkModeMediaQuery);
 
-        // Bloquear completamente zoom por pellizco y doble toque
         let lastTouchEnd = 0;
         document.addEventListener('touchend', (event) => {
             const now = Date.now();
@@ -272,7 +270,7 @@
 
         function appendMessage(sender, text, fileObj = null, isTyping = false, historyIndex = null) {
             const isUser = sender === 'user' || sender === 'system';
-            if (sender === 'system') return; // Ocultar mensajes de sistema en UI
+            if (sender === 'system') return;
 
             const row = document.createElement('div');
             row.className = `flex items-start gap-3 w-full ${isUser ? 'justify-end' : 'justify-start'}`;
@@ -285,7 +283,7 @@
             }
 
             const bubbleContainer = document.createElement('div');
-            bubbleContainer.className = `max-w-[85%] flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1`;
+            bubbleContainer.className = `max-w-[85%] flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1.5`;
 
             const bubble = document.createElement('div');
             bubble.className = `rounded-2xl px-5 py-4 text-sm leading-relaxed shadow-sm markdown-content ${
@@ -317,25 +315,42 @@
             bubble.appendChild(textNode);
             bubbleContainer.appendChild(bubble);
 
-            // Controles flotantes para mensajes (Editar en usuario, Copiar en bot)
+            // Iconos minimalistas debajo del chat estilo Gemini
             if (!isTyping) {
                 const actionsBar = document.createElement('div');
-                actionsBar.className = "flex items-center gap-2 text-xs text-[var(--text-secondary)] px-1";
+                actionsBar.className = "flex items-center gap-3 text-[var(--text-secondary)] px-1";
 
                 if (isUser && historyIndex !== null) {
                     const editBtn = document.createElement('button');
-                    editBtn.className = "hover:text-[var(--text-main)] flex items-center gap-1 transition py-0.5 px-1.5 rounded bg-black/5 dark:bg-white/5";
-                    editBtn.innerHTML = `✏️ Editar`;
+                    editBtn.className = "hover:text-[var(--text-main)] transition p-1";
+                    editBtn.title = "Editar mensaje";
+                    editBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`;
                     editBtn.onclick = () => editMessage(historyIndex);
                     actionsBar.appendChild(editBtn);
                 } else if (!isUser) {
+                    // Botón Reintentar
+                    const retryBtn = document.createElement('button');
+                    retryBtn.className = "hover:text-[var(--text-main)] transition p-1";
+                    retryBtn.title = "Reintentar respuesta";
+                    retryBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>`;
+                    retryBtn.onclick = () => {
+                        if (historyIndex !== null && historyIndex > 0) {
+                            editMessage(historyIndex - 1);
+                        }
+                    };
+                    actionsBar.appendChild(retryBtn);
+
+                    // Botón Copiar
                     const copyBtn = document.createElement('button');
-                    copyBtn.className = "hover:text-[var(--text-main)] flex items-center gap-1 transition py-0.5 px-1.5 rounded bg-black/5 dark:bg-white/5";
-                    copyBtn.innerHTML = `📋 Copiar`;
+                    copyBtn.className = "hover:text-[var(--text-main)] transition p-1";
+                    copyBtn.title = "Copiar texto";
+                    copyBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
                     copyBtn.onclick = () => {
                         navigator.clipboard.writeText(text);
-                        copyBtn.innerText = "¡Copiado!";
-                        setTimeout(() => copyBtn.innerHTML = "📋 Copiar", 2000);
+                        copyBtn.innerHTML = `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>`;
+                        setTimeout(() => {
+                            copyBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
+                        }, 2000);
                     };
                     actionsBar.appendChild(copyBtn);
                 }
@@ -355,12 +370,10 @@
             const newText = prompt("Edita tu mensaje:", oldMsg.content);
             if (newText === null || newText.trim() === '') return;
 
-            // Cortar el historial hasta este punto para reescribir la conversación
             chatHistory = chatHistory.slice(0, index);
             localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
             renderStoredHistory();
 
-            // Enviar el mensaje editado
             await processAndSend(newText.trim(), null);
         }
 
@@ -385,13 +398,11 @@
         });
 
         async function processAndSend(messageText, fileToSend) {
-            // Añadir mensaje de usuario al historial local
             chatHistory.push({ role: "user", content: messageText });
             localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
 
             renderStoredHistory();
 
-            // Crear burbuja temporal de "pensando"
             const botBubbleContainer = appendMessage('bot', '', null, true);
             const textContainer = botBubbleContainer.querySelector('div');
 
@@ -401,7 +412,6 @@
                     throw new Error("Falta configurar tu API Key de Groq. Haz clic en el botón superior para ingresarla.");
                 }
 
-                // Construir mensajes para la API incluyendo el historial completo para mantener contexto
                 const apiMessages = [
                     { role: "system", content: "Eres Paul, un asistente personal útil, directo, amigable y bien estructurado." },
                     ...chatHistory.map(m => ({ role: m.role, content: m.content }))
@@ -456,7 +466,6 @@
                     }
                 }
 
-                // Guardar respuesta del asistente en el historial
                 chatHistory.push({ role: "assistant", content: fullResponse });
                 localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
                 renderStoredHistory();
