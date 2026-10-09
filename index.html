@@ -161,8 +161,8 @@
         const fileInput = document.getElementById("file-input");
         const fileIndicator = document.getElementById("file-indicator");
 
-        // Modelo optimizado y veloz de Groq
-        const selectedModel = "llama-3.3-70b-versatile";
+        // Modelo activo y veloz de Groq
+        const selectedModel = "llama-3.1-8b-instant";
         let attachedFile = null;
 
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -275,7 +275,6 @@
                     throw new Error("Falta configurar tu API Key de Groq. Haz clic arriba en el botón '🔑 Llave' e ingresa tu clave.");
                 }
 
-                // Estructura de mensajes compatible con la API de Groq
                 const messagesArray = [
                     { role: "system", content: "Eres Paul, un asistente personal útil, directo y amigable." },
                     { role: "user", content: messageText }
