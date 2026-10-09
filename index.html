@@ -47,11 +47,14 @@
             }
         }
 
+        /* Bloquear zoom por gestos, pellizcos y doble toque en móviles */
         html, body {
             touch-action: manipulation;
             -webkit-text-size-adjust: 100%;
             height: 100%;
             overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
@@ -128,9 +131,7 @@
         <div class="flex items-center gap-3">
             <img src="logo.jpg" alt="Paul Logo" class="w-8 h-8 rounded-full object-cover shadow-md border border-[var(--border-color)]">
             <div>
-                <h1 class="text-base font-medium tracking-wide flex items-center gap-2">
-                    Paul <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20">Groq LPU</span>
-                </h1>
+                <h1 class="text-base font-medium tracking-wide">Paul</h1>
                 <p class="text-xs text-[var(--text-secondary)]">Asistente personal ultrarrápido</p>
             </div>
         </div>
@@ -139,21 +140,14 @@
             <button id="keys-btn" onclick="configureKeys()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition text-xs flex items-center gap-1 border border-[var(--border-color)] px-3 py-1 rounded-full hidden" title="Configurar API Key">
                 🔑 Llave
             </button>
-            <button onclick="location.reload()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition" title="Reiniciar chat">
+            <button onclick="clearChat()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition" title="Nuevo chat">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             </button>
         </div>
     </header>
 
     <!-- Contenedor del Chat -->
-    <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-6 max-w-3xl w-full mx-auto">
-        <div class="flex items-start gap-3">
-            <img src="logo.jpg" alt="Paul" class="w-8 h-8 rounded-full object-cover flex-shrink-0 shadow border border-[var(--border-color)]">
-            <div class="gemini-bubble-ai rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed shadow-sm markdown-content">
-                ¡Hola! Soy <strong>Paul</strong> impulsado por Groq. Estoy listo para ayudarte con tus consultas.
-            </div>
-        </div>
-    </main>
+    <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-6 max-w-3xl w-full mx-auto"></main>
 
     <!-- Barra de Entrada -->
     <footer class="p-3 gemini-header border-t flex flex-col items-center transition-colors duration-300 relative">
@@ -193,11 +187,14 @@
         const fileInput = document.getElementById("file-input");
         const fileIndicator = document.getElementById("file-indicator");
 
-        // Modelo actual activo en Groq
         const selectedModel = "openai/gpt-oss-120b";
         let attachedFile = null;
 
+        // Historial de mensajes guardado localmente
+        let chatHistory = JSON.parse(localStorage.getItem('paul_chat_history')) || [];
+
         checkKeysState();
+        renderStoredHistory();
 
         function checkKeysState() {
             const groqKey = localStorage.getItem('paul_groq_key');
@@ -215,6 +212,7 @@
         darkModeMediaQuery.addEventListener('change', updateThemeColor);
         updateThemeColor(darkModeMediaQuery);
 
+        // Bloquear completamente zoom por pellizco y doble toque
         let lastTouchEnd = 0;
         document.addEventListener('touchend', (event) => {
             const now = Date.now();
@@ -223,6 +221,7 @@
             }
             lastTouchEnd = now;
         }, false);
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
 
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
@@ -249,12 +248,32 @@
                 }
                 localStorage.setItem('paul_groq_key', cleanKey);
                 checkKeysState();
-                alert("¡Llave de Groq guardada correctamente! El botón de llave se ha ocultado.");
+                alert("¡Llave de Groq guardada correctamente!");
             }
         }
 
-        function appendMessage(sender, text, fileObj = null, isTyping = false) {
-            const isUser = sender === 'user';
+        function clearChat() {
+            localStorage.removeItem('paul_chat_history');
+            chatHistory = [];
+            chatContainer.innerHTML = '';
+            appendMessage('bot', '¡Hola! Soy Paul, ¿qué puedo hacer por ti?', null, false, null);
+        }
+
+        function renderStoredHistory() {
+            chatContainer.innerHTML = '';
+            if (chatHistory.length === 0) {
+                appendMessage('bot', '¡Hola! Soy Paul, ¿qué puedo hacer por ti?', null, false, null);
+            } else {
+                chatHistory.forEach((msg, index) => {
+                    appendMessage(msg.role, msg.content, null, false, index);
+                });
+            }
+        }
+
+        function appendMessage(sender, text, fileObj = null, isTyping = false, historyIndex = null) {
+            const isUser = sender === 'user' || sender === 'system';
+            if (sender === 'system') return; // Ocultar mensajes de sistema en UI
+
             const row = document.createElement('div');
             row.className = `flex items-start gap-3 w-full ${isUser ? 'justify-end' : 'justify-start'}`;
             
@@ -265,8 +284,11 @@
                 row.appendChild(avatar);
             }
 
+            const bubbleContainer = document.createElement('div');
+            bubbleContainer.className = `max-w-[85%] flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1`;
+
             const bubble = document.createElement('div');
-            bubble.className = `rounded-2xl px-5 py-4 max-w-[85%] text-sm leading-relaxed shadow-sm markdown-content ${
+            bubble.className = `rounded-2xl px-5 py-4 text-sm leading-relaxed shadow-sm markdown-content ${
                 isUser ? 'gemini-bubble-user rounded-br-sm' : 'gemini-bubble-ai rounded-bl-sm'
             }`;
 
@@ -293,10 +315,53 @@
             }
             
             bubble.appendChild(textNode);
-            row.appendChild(bubble);
+            bubbleContainer.appendChild(bubble);
+
+            // Controles flotantes para mensajes (Editar en usuario, Copiar en bot)
+            if (!isTyping) {
+                const actionsBar = document.createElement('div');
+                actionsBar.className = "flex items-center gap-2 text-xs text-[var(--text-secondary)] px-1";
+
+                if (isUser && historyIndex !== null) {
+                    const editBtn = document.createElement('button');
+                    editBtn.className = "hover:text-[var(--text-main)] flex items-center gap-1 transition py-0.5 px-1.5 rounded bg-black/5 dark:bg-white/5";
+                    editBtn.innerHTML = `✏️ Editar`;
+                    editBtn.onclick = () => editMessage(historyIndex);
+                    actionsBar.appendChild(editBtn);
+                } else if (!isUser) {
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = "hover:text-[var(--text-main)] flex items-center gap-1 transition py-0.5 px-1.5 rounded bg-black/5 dark:bg-white/5";
+                    copyBtn.innerHTML = `📋 Copiar`;
+                    copyBtn.onclick = () => {
+                        navigator.clipboard.writeText(text);
+                        copyBtn.innerText = "¡Copiado!";
+                        setTimeout(() => copyBtn.innerHTML = "📋 Copiar", 2000);
+                    };
+                    actionsBar.appendChild(copyBtn);
+                }
+                bubbleContainer.appendChild(actionsBar);
+            }
+            
+            row.appendChild(bubbleContainer);
             chatContainer.appendChild(row);
             chatContainer.scrollTop = chatContainer.scrollHeight;
             return bubble;
+        }
+
+        async function editMessage(index) {
+            const oldMsg = chatHistory[index];
+            if (!oldMsg || oldMsg.role !== 'user') return;
+
+            const newText = prompt("Edita tu mensaje:", oldMsg.content);
+            if (newText === null || newText.trim() === '') return;
+
+            // Cortar el historial hasta este punto para reescribir la conversación
+            chatHistory = chatHistory.slice(0, index);
+            localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
+            renderStoredHistory();
+
+            // Enviar el mensaje editado
+            await processAndSend(newText.trim(), null);
         }
 
         chatForm.addEventListener("submit", async (e) => {
@@ -316,9 +381,17 @@
                 messageText += ` [Archivo adjunto: ${fileToSend.name}]`;
             }
 
-            appendMessage('user', text || "Analiza este archivo:", fileToSend);
-            
-            // Iniciar burbuja con animación de pensando
+            await processAndSend(messageText, fileToSend);
+        });
+
+        async function processAndSend(messageText, fileToSend) {
+            // Añadir mensaje de usuario al historial local
+            chatHistory.push({ role: "user", content: messageText });
+            localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
+
+            renderStoredHistory();
+
+            // Crear burbuja temporal de "pensando"
             const botBubbleContainer = appendMessage('bot', '', null, true);
             const textContainer = botBubbleContainer.querySelector('div');
 
@@ -328,9 +401,10 @@
                     throw new Error("Falta configurar tu API Key de Groq. Haz clic en el botón superior para ingresarla.");
                 }
 
-                const messagesArray = [
+                // Construir mensajes para la API incluyendo el historial completo para mantener contexto
+                const apiMessages = [
                     { role: "system", content: "Eres Paul, un asistente personal útil, directo, amigable y bien estructurado." },
-                    { role: "user", content: messageText }
+                    ...chatHistory.map(m => ({ role: m.role, content: m.content }))
                 ];
 
                 const url = "https://api.groq.com/openai/v1/chat/completions";
@@ -342,8 +416,8 @@
                     },
                     body: JSON.stringify({
                         model: selectedModel,
-                        messages: messagesArray,
-                        stream: true // <--- ACTIVAR STREAMING EN TIEMPO REAL
+                        messages: apiMessages,
+                        stream: true
                     })
                 });
 
@@ -374,21 +448,24 @@
                                 const content = parsed.choices[0]?.delta?.content || "";
                                 if (content) {
                                     fullResponse += content;
-                                    // Actualizar el texto en tiempo real con formato Markdown
                                     textContainer.innerHTML = marked.parse(fullResponse);
                                     chatContainer.scrollTop = chatContainer.scrollHeight;
                                 }
-                            } catch (e) {
-                                // Ignorar errores de parsing de chunks parciales
-                            }
+                            } catch (e) {}
                         }
                     }
                 }
+
+                // Guardar respuesta del asistente en el historial
+                chatHistory.push({ role: "assistant", content: fullResponse });
+                localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
+                renderStoredHistory();
+
             } catch (err) {
                 console.error(err);
                 textContainer.innerText = "Error: " + err.message;
             }
-        });
+        }
     </script>
 </body>
 </html>
