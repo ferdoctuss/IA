@@ -124,13 +124,33 @@
         }
     </style>
 </head>
-<body class="flex flex-col justify-between h-full">
+<body class="flex flex-col justify-between h-full relative">
 
-    <!-- Cabecera estilo Imagen 3 -->
+    <!-- Panel Lateral de Historial (Drawer) -->
+    <div id="history-drawer" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden transition-opacity duration-300 flex justify-start">
+        <div class="w-80 h-full gemini-header border-r flex flex-col p-4 shadow-2xl transition-transform duration-300">
+            <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
+                <h2 class="font-medium text-base">Historial de Chats</h2>
+                <button onclick="toggleHistoryDrawer()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <button onclick="startNewChat()" class="mt-4 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium text-sm transition shadow flex items-center justify-center gap-2">
+                <span>+ Nuevo chat</span>
+            </button>
+
+            <div id="history-list" class="flex-1 overflow-y-auto mt-4 space-y-2">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+        <div class="flex-1" onclick="toggleHistoryDrawer()"></div>
+    </div>
+
+    <!-- Cabecera -->
     <header class="gemini-header flex items-center justify-between px-4 py-3 border-b select-none z-10 transition-colors duration-300">
-        <!-- Izquierda: Botón minimalista de historial / menú -->
         <div class="flex items-center gap-3">
-            <button onclick="toggleHistoryModal()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition" title="Historial">
+            <button onclick="toggleHistoryDrawer()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition" title="Historial">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             <div>
@@ -139,17 +159,13 @@
             </div>
         </div>
 
-        <!-- Derecha: Botón de nuevo chat y logo de perfil / llave -->
         <div class="flex items-center gap-2">
-            <!-- Botón de Llave (se oculta automáticamente si ya hay llave guardada) -->
             <button id="keys-btn" onclick="configureKeys()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition text-xs flex items-center gap-1 border border-[var(--border-color)] px-3 py-1 rounded-full hidden" title="Configurar API Key">
                 🔑 Llave
             </button>
-            <!-- Botón Nuevo Chat (estilo lápiz circular) -->
-            <button onclick="clearChat()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition" title="Nuevo chat">
+            <button onclick="startNewChat()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition" title="Nuevo chat">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
             </button>
-            <!-- Logo a la derecha -->
             <img src="logo.jpg" alt="Perfil" class="w-10 h-10 rounded-full object-cover shadow-sm border border-[var(--border-color)] cursor-pointer" onclick="configureKeys()" title="Configurar API Key">
         </div>
     </header>
@@ -157,7 +173,7 @@
     <!-- Contenedor del Chat -->
     <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-6 max-w-3xl w-full mx-auto"></main>
 
-    <!-- Barra de Entrada Estilo Gemini (Imagen 1) -->
+    <!-- Barra de Entrada Estilo Gemini -->
     <footer class="p-4 gemini-header flex flex-col items-center transition-colors duration-300 relative">
         <form id="chat-form" class="gemini-input-container w-full max-w-3xl border rounded-full px-4 py-2.5 flex items-center gap-3 focus-within:border-blue-500 transition shadow-md">
             
@@ -194,14 +210,18 @@
         const keysBtn = document.getElementById("keys-btn");
         const fileInput = document.getElementById("file-input");
         const fileIndicator = document.getElementById("file-indicator");
+        const historyDrawer = document.getElementById("history-drawer");
+        const historyList = document.getElementById("history-list");
 
         const selectedModel = "openai/gpt-oss-120b";
         let attachedFile = null;
 
         let chatHistory = JSON.parse(localStorage.getItem('paul_chat_history')) || [];
+        let sessions = JSON.parse(localStorage.getItem('paul_sessions')) || [];
 
         checkKeysState();
         renderStoredHistory();
+        updateHistoryDrawerList();
 
         function checkKeysState() {
             const groqKey = localStorage.getItem('paul_groq_key');
@@ -258,20 +278,68 @@
             }
         }
 
-        function toggleHistoryModal() {
-            const hasKey = localStorage.getItem('paul_groq_key');
-            if (!hasKey) {
-                configureKeys();
-            } else {
-                alert("Historial activo: Tienes almacenados " + (chatHistory.length / 2) + " intercambios en esta sesión.");
-            }
+        function toggleHistoryDrawer() {
+            historyDrawer.classList.toggle('hidden');
+            updateHistoryDrawerList();
         }
 
-        function clearChat() {
+        function updateHistoryDrawerList() {
+            historyList.innerHTML = '';
+            
+            // Si hay chat activo actual, mostrarlo como sesión principal
+            if (chatHistory.length > 0) {
+                const currentSessionBtn = document.createElement('div');
+                currentSessionBtn.className = "p-3 rounded-xl bg-black/5 dark:bg-white/5 cursor-pointer text-sm font-medium truncate flex items-center justify-between";
+                const firstUserMsg = chatHistory.find(m => m.role === 'user');
+                currentSessionBtn.innerHTML = `<span>💬 ${firstUserMsg ? firstUserMsg.content.substring(0, 25) + '...' : 'Chat actual'}</span> <span class="text-xs text-blue-500">Activo</span>`;
+                historyList.appendChild(currentSessionBtn);
+            }
+
+            if (sessions.length === 0 && chatHistory.length === 0) {
+                historyList.innerHTML = `<p class="text-xs text-[var(--text-secondary)] text-center py-4">No hay chats guardados</p>`;
+                return;
+            }
+
+            sessions.forEach((session, idx) => {
+                const item = document.createElement('div');
+                item.className = "p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer text-sm truncate flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--text-main)] transition";
+                item.innerHTML = `<span>🗨️ ${session.title || 'Conversación anterior'}</span>`;
+                item.onclick = () => loadSession(idx);
+                historyList.appendChild(item);
+            });
+        }
+
+        function startNewChat() {
+            if (chatHistory.length > 0) {
+                const firstMsg = chatHistory.find(m => m.role === 'user');
+                const title = firstMsg ? firstMsg.content.substring(0, 25) + '...' : 'Chat anterior';
+                sessions.unshift({ title, history: [...chatHistory] });
+                localStorage.setItem('paul_sessions', JSON.stringify(sessions));
+            }
+
             localStorage.removeItem('paul_chat_history');
             chatHistory = [];
             chatContainer.innerHTML = '';
             appendMessage('bot', '¡Hola! Soy Paul, ¿qué puedo hacer por ti?', null, false, null);
+            toggleHistoryDrawer();
+        }
+
+        function loadSession(idx) {
+            const session = sessions[idx];
+            if (session) {
+                // Guardar chat actual en sesiones antes de cambiar
+                if (chatHistory.length > 0) {
+                    const firstMsg = chatHistory.find(m => m.role === 'user');
+                    const title = firstMsg ? firstMsg.content.substring(0, 25) + '...' : 'Chat anterior';
+                    sessions.unshift({ title, history: [...chatHistory] });
+                }
+                chatHistory = [...session.history];
+                sessions.splice(idx, 1);
+                localStorage.setItem('paul_sessions', JSON.stringify(sessions));
+                localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
+                renderStoredHistory();
+                toggleHistoryDrawer();
+            }
         }
 
         function renderStoredHistory() {
