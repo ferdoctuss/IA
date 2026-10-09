@@ -78,6 +78,22 @@
             border-color: var(--border-color);
         }
 
+        /* Animación de puntos rebotando */
+        @keyframes bounce-custom {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+        .typing-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background-color: currentColor;
+            border-radius: 50%;
+            animation: bounce-custom 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
         ::-webkit-scrollbar {
             width: 4px;
         }
@@ -104,8 +120,8 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <!-- Botón de Llave siempre visible -->
-            <button id="keys-btn" onclick="configureKeys()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition text-xs flex items-center gap-1 border border-[var(--border-color)] px-3 py-1 rounded-full" title="Configurar API Key">
+            <!-- Botón de Llave (se oculta automáticamente si ya hay llave guardada) -->
+            <button id="keys-btn" onclick="configureKeys()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition text-xs flex items-center gap-1 border border-[var(--border-color)] px-3 py-1 rounded-full hidden" title="Configurar API Key">
                 🔑 Llave
             </button>
             <button onclick="location.reload()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition" title="Reiniciar chat">
@@ -158,12 +174,25 @@
         const chatForm = document.getElementById("chat-form");
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
+        const keysBtn = document.getElementById("keys-btn");
         const fileInput = document.getElementById("file-input");
         const fileIndicator = document.getElementById("file-indicator");
 
-        // Modelo activo y veloz de Groq
+        // Modelo veloz y estable de Groq
         const selectedModel = "llama-3.1-8b-instant";
         let attachedFile = null;
+
+        // Comprobar estado de la llave al cargar la app
+        checkKeysState();
+
+        function checkKeysState() {
+            const groqKey = localStorage.getItem('paul_groq_key');
+            if (!groqKey || groqKey.trim() === '') {
+                keysBtn.classList.remove('hidden');
+            } else {
+                keysBtn.classList.add('hidden');
+            }
+        }
 
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         function updateThemeColor(e) {
@@ -196,6 +225,7 @@
                 const cleanKey = groqKey.trim();
                 if (cleanKey === '') {
                     localStorage.removeItem('paul_groq_key');
+                    checkKeysState();
                     alert("Se ha borrado la llave guardada.");
                     return;
                 }
@@ -204,11 +234,12 @@
                     return;
                 }
                 localStorage.setItem('paul_groq_key', cleanKey);
-                alert("¡Llave de Groq guardada correctamente en tu navegador!");
+                checkKeysState();
+                alert("¡Llave de Groq guardada correctamente! El botón de llave se ha ocultado.");
             }
         }
 
-        function appendMessage(sender, text, fileObj = null) {
+        function appendMessage(sender, text, fileObj = null, isTyping = false) {
             const isUser = sender === 'user';
             const row = document.createElement('div');
             row.className = `flex items-start gap-3 w-full ${isUser ? 'justify-end' : 'justify-start'}`;
@@ -240,9 +271,15 @@
             }
 
             const textNode = document.createElement('div');
-            textNode.innerText = text;
-            bubble.appendChild(textNode);
             
+            if (isTyping) {
+                // Animación de puntos rebotando
+                textNode.innerHTML = `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
+            } else {
+                textNode.innerText = text;
+            }
+            
+            bubble.appendChild(textNode);
             row.appendChild(bubble);
             chatContainer.appendChild(row);
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -267,12 +304,14 @@
             }
 
             appendMessage('user', text || "Analiza este archivo:", fileToSend);
-            const botBubble = appendMessage('bot', 'Pensando...');
+            
+            // Mostrar burbuja con animación de pensando
+            const botBubbleContainer = appendMessage('bot', '', null, true);
 
             try {
                 const apiKey = localStorage.getItem('paul_groq_key');
                 if (!apiKey) {
-                    throw new Error("Falta configurar tu API Key de Groq. Haz clic arriba en el botón '🔑 Llave' e ingresa tu clave.");
+                    throw new Error("Falta configurar tu API Key de Groq. Haz clic en el botón superior para ingresarla.");
                 }
 
                 const messagesArray = [
@@ -296,10 +335,11 @@
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
                 
-                botBubble.innerText = data.choices[0].message.content;
+                // Reemplazar la animación por la respuesta real
+                botBubbleContainer.innerText = data.choices[0].message.content;
             } catch (err) {
                 console.error(err);
-                botBubble.innerText = "Error: " + err.message;
+                botBubbleContainer.innerText = "Error: " + err.message;
             }
         });
     </script>
