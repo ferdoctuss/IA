@@ -47,7 +47,7 @@
             }
         }
 
-        /* Bloquear completamente zoom, rebotes y desplazamiento horizontal en móviles */
+        /* Bloquear zoom por gestos, pellizcos y desplazamiento elástico en móviles */
         html, body {
             touch-action: pan-y;
             -webkit-text-size-adjust: 100%;
@@ -100,7 +100,6 @@
         .markdown-content strong { font-weight: 600; }
         .markdown-content code { background: rgba(0,0,0,0.06); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 85%; word-break: break-all; }
         
-        /* Ajuste responsivo para tablas grandes */
         .markdown-content table {
             width: 100%;
             display: block;
@@ -149,7 +148,7 @@
 </head>
 <body class="flex flex-col justify-between h-full w-full">
 
-    <!-- Panel Lateral de Historial (Drawer) -->
+    <!-- Panel Lateral de Historial (Drawer estilo Gemini) -->
     <div id="history-drawer" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden transition-opacity duration-300 flex justify-start">
         <div class="w-80 h-full gemini-header border-r flex flex-col p-4 shadow-2xl transition-transform duration-300">
             <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
@@ -163,42 +162,45 @@
                 <span>+ Nuevo chat</span>
             </button>
 
-            <div id="history-list" class="flex-1 overflow-y-auto mt-4 space-y-2">
-                <!-- Se llena dinámicamente -->
-            </div>
+            <div id="history-list" class="flex-1 overflow-y-auto mt-4 space-y-2"></div>
         </div>
         <div class="flex-1" onclick="toggleHistoryDrawer()"></div>
     </div>
 
-    <!-- Cabecera -->
+    <!-- Cabecera exacta a la interfaz de Gemini -->
     <header class="gemini-header flex items-center justify-between px-4 py-3 border-b select-none z-10 transition-colors duration-300 flex-shrink-0">
+        <!-- Izquierda: Menú / Historial -->
         <div class="flex items-center gap-3">
             <button onclick="toggleHistoryDrawer()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0" title="Historial">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            <div class="min-w-0">
-                <h1 class="text-base font-medium tracking-wide truncate">Paul</h1>
-                <p class="text-xs text-[var(--text-secondary)] truncate">Asistente personal ultrarrápido</p>
+            
+            <!-- Selector central idéntico a Gemini -->
+            <div class="flex items-center gap-1.5 cursor-pointer py-1 px-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition" onclick="configureKeys()">
+                <span class="text-base font-semibold tracking-wide">Paul</span>
+                <span class="text-sm text-[var(--text-secondary)] font-normal">Flash</span>
+                <svg class="w-4 h-4 text-[var(--text-secondary)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
             </div>
         </div>
 
+        <!-- Derecha: Botón de edición de nuevo chat y perfil -->
         <div class="flex items-center gap-2 flex-shrink-0">
             <button id="keys-btn" onclick="configureKeys()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition text-xs flex items-center gap-1 border border-[var(--border-color)] px-3 py-1 rounded-full hidden" title="Configurar API Key">
                 🔑 Llave
             </button>
             <button onclick="startNewChat()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0" title="Nuevo chat">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             </button>
             <img src="logo.jpg" alt="Perfil" class="w-10 h-10 rounded-full object-cover shadow-sm border border-[var(--border-color)] cursor-pointer flex-shrink-0" onclick="configureKeys()" title="Configurar API Key">
         </div>
     </header>
 
-    <!-- Contenedor del Chat (Ajustado para evitar desbordamiento horizontal) -->
+    <!-- Contenedor del Chat (Ajustado para evitar desbordamientos) -->
     <main id="chat-container" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 space-y-6 max-w-3xl w-full mx-auto"></main>
 
-    <!-- Barra de Entrada Estilo Gemini -->
-    <footer class="p-4 gemini-header flex flex-col items-center transition-colors duration-300 relative flex-shrink-0">
-        <form id="chat-form" class="gemini-input-container w-full max-w-3xl border rounded-full px-4 py-2.5 flex items-center gap-3 focus-within:border-blue-500 transition shadow-md">
+    <!-- Barra Inferior de Entrada (Estilo exacto de la Foto 1 de Gemini) -->
+    <footer class="p-3 gemini-header flex flex-col items-center transition-colors duration-300 relative flex-shrink-0 pb-6">
+        <form id="chat-form" class="gemini-input-container w-full max-w-3xl border rounded-full px-4 py-2.5 flex items-center gap-3 focus-within:border-blue-500 transition shadow-lg">
             
             <input type="file" id="file-input" class="hidden" accept="image/*,.pdf,.txt,.doc,.docx">
             <button type="button" onclick="document.getElementById('file-input').click()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] transition flex items-center justify-center flex-shrink-0" title="Adjuntar archivo o foto">
@@ -262,7 +264,6 @@
         darkModeMediaQuery.addEventListener('change', updateThemeColor);
         updateThemeColor(darkModeMediaQuery);
 
-        // Bloquear gestos de zoom y desplazamiento horizontal elástico en iOS/Android
         document.addEventListener('gesturestart', (e) => e.preventDefault());
 
         fileInput.addEventListener('change', (e) => {
