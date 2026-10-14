@@ -17,17 +17,18 @@
     <!-- Librería Marked.js para formato Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <meta name="theme-color" content="#131314" id="theme-color-meta">
+    <meta name="theme-color" content="#ffffff" id="theme-color-meta">
     <style>
         :root {
-            --bg-main: #f8f9fa;
-            --bg-header: #f8f9fa;
-            --border-color: #dadce0;
+            --bg-main: #ffffff;
+            --bg-header: #ffffff;
+            --border-color: #e5e5e5;
             --text-main: #1f1f1f;
             --text-secondary: #5f6368;
-            --bubble-user: #0b57d0;
-            --bubble-user-text: #ffffff;
-            --input-bg: #ffffff;
+            --bubble-user: #f0f4f9;
+            --bubble-user-text: #1f1f1f;
+            --input-bg: #f0f4f9;
+            --input-border: transparent;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -37,13 +38,13 @@
                 --border-color: #3c4043;
                 --text-main: #e3e3e3;
                 --text-secondary: #9aa0a6;
-                --bubble-user: #004a77;
-                --bubble-user-text: #ffffff;
+                --bubble-user: #282a2c;
+                --bubble-user-text: #e3e3e3;
                 --input-bg: #1e1f20;
+                --input-border: transparent;
             }
         }
 
-        /* Bloquear zoom por gestos, pellizcos y desplazamiento elástico en móviles */
         html, body {
             touch-action: pan-y;
             -webkit-text-size-adjust: 100%;
@@ -66,30 +67,38 @@
             border-color: var(--border-color);
         }
 
-        /* --- NUEVOS ESTILOS ESTILO GEMINI --- */
+        /* --- ESTILOS ESTILO GEMINI (FOTO 2) --- */
         .gemini-bubble-ai {
             background-color: transparent !important;
             border: none !important;
             padding: 0 !important;
             color: var(--text-main);
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
         .gemini-bubble-user {
             background-color: var(--bubble-user);
             color: var(--bubble-user-text);
-            border-radius: 20px;
-            border-bottom-right-radius: 4px;
-            padding: 12px 18px;
+            border-radius: 24px;
+            padding: 12px 20px;
             width: fit-content; 
-            max-width: 100%;
+            max-width: 85%;
+            font-size: 0.95rem;
         }
 
         .gemini-input-container {
             background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            transition: all 0.2s ease;
+        }
+        
+        .gemini-input-container:focus-within {
+            background-color: var(--bg-main);
             border-color: var(--border-color);
         }
 
-        /* Estilos Markdown y adaptación estricta a pantallas móviles */
+        /* Estilos Markdown */
         .markdown-content {
             overflow-wrap: break-word;
             word-break: break-word;
@@ -128,32 +137,26 @@
         }
         .typing-dot {
             display: inline-block;
-            width: 7px;
-            height: 7px;
-            background-color: currentColor;
+            width: 6px;
+            height: 6px;
+            background-color: var(--text-secondary);
             border-radius: 50%;
             animation: bounce-custom 1.4s infinite ease-in-out both;
+            margin-right: 2px;
         }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
 
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
     </style>
 </head>
 <body class="flex flex-col justify-between h-full w-full">
 
-    <!-- Panel Lateral de Historial (Drawer estilo Gemini) -->
+    <!-- Panel Lateral de Historial -->
     <div id="history-drawer" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden transition-opacity duration-300 flex justify-start">
-        <div class="w-80 h-full gemini-header border-r flex flex-col p-4 shadow-2xl transition-transform duration-300">
+        <div class="w-80 h-full bg-[var(--bg-main)] border-r border-[var(--border-color)] flex flex-col p-4 shadow-2xl transition-transform duration-300">
             <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
                 <h2 class="font-medium text-base">Historial de Chats</h2>
                 <button onclick="toggleHistoryDrawer()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition">
@@ -170,43 +173,43 @@
         <div class="flex-1" onclick="toggleHistoryDrawer()"></div>
     </div>
 
-    <!-- Cabecera exacta a la interfaz de Gemini -->
-    <header class="gemini-header flex items-center justify-between px-4 py-3 border-b select-none z-10 transition-colors duration-300 flex-shrink-0">
-        <!-- Izquierda: Menú / Historial -->
-        <div class="flex items-center gap-3">
-            <button onclick="toggleHistoryDrawer()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0" title="Historial">
+    <!-- Cabecera estilo Gemini -->
+    <header class="gemini-header flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)] select-none z-10 transition-colors duration-300 flex-shrink-0">
+        <!-- Izquierda -->
+        <div class="flex items-center gap-2">
+            <button onclick="toggleHistoryDrawer()" class="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0" title="Historial">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             
-            <!-- Selector central idéntico a Gemini -->
-            <div class="flex items-center gap-1.5 cursor-pointer py-1 px-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition" onclick="configureKeys()">
-                <span class="text-base font-semibold tracking-wide">Paul</span>
-                <span class="text-sm text-[var(--text-secondary)] font-normal">Flash</span>
-                <svg class="w-4 h-4 text-[var(--text-secondary)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+            <div class="flex items-center gap-1 cursor-pointer py-1.5 px-3 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition" onclick="configureKeys()">
+                <span class="text-[17px] font-medium tracking-wide text-[var(--text-main)]">Paul</span>
+                <span class="text-[17px] text-[var(--text-secondary)] font-normal">Flash</span>
+                <svg class="w-4 h-4 text-[var(--text-secondary)] ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
             </div>
         </div>
 
-        <!-- Derecha: Botón de edición de nuevo chat y perfil -->
+        <!-- Derecha: Menú tipo píldora estilo Gemini -->
         <div class="flex items-center gap-2 flex-shrink-0">
-            <button id="keys-btn" onclick="configureKeys()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full transition text-xs flex items-center gap-1 border border-[var(--border-color)] px-3 py-1 rounded-full hidden" title="Configurar API Key">
-                🔑 Llave
-            </button>
-            <button onclick="startNewChat()" class="w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0" title="Nuevo chat">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-            </button>
-            <img src="logo.jpg" alt="Perfil" class="w-10 h-10 rounded-full object-cover shadow-sm border border-[var(--border-color)] cursor-pointer flex-shrink-0" onclick="configureKeys()" title="Configurar API Key">
+            <div class="flex items-center border border-[var(--border-color)] rounded-full bg-[var(--bg-main)] overflow-hidden">
+                <button onclick="startNewChat()" class="p-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]" title="Nuevo chat">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path></svg>
+                </button>
+                <button onclick="configureKeys()" class="p-2.5 border-l border-[var(--border-color)] hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]" title="Configurar API Key">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Contenedor del Chat (Ajustado para evitar desbordamientos) -->
-    <main id="chat-container" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 space-y-6 max-w-3xl w-full mx-auto"></main>
+    <!-- Contenedor del Chat -->
+    <main id="chat-container" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-8 space-y-10 max-w-3xl w-full mx-auto"></main>
 
-    <!-- Barra Inferior de Entrada (Estilo exacto de la Foto 1 de Gemini) -->
-    <footer class="p-3 gemini-header flex flex-col items-center transition-colors duration-300 relative flex-shrink-0 pb-6">
-        <form id="chat-form" class="gemini-input-container w-full max-w-3xl border rounded-full px-4 py-2.5 flex items-center gap-3 focus-within:border-blue-500 transition shadow-lg">
+    <!-- Barra Inferior de Entrada (Estilo Gemini) -->
+    <footer class="p-3 bg-[var(--bg-main)] flex flex-col items-center transition-colors duration-300 relative flex-shrink-0 pb-6">
+        <form id="chat-form" class="gemini-input-container w-full max-w-3xl rounded-[28px] px-2 py-1.5 flex items-center gap-1 shadow-sm">
             
             <input type="file" id="file-input" class="hidden" accept="image/*,.pdf,.txt,.doc,.docx">
-            <button type="button" onclick="document.getElementById('file-input').click()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] transition flex items-center justify-center flex-shrink-0" title="Adjuntar archivo o foto">
+            <button type="button" onclick="document.getElementById('file-input').click()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0" title="Adjuntar archivo">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
             </button>
 
@@ -215,18 +218,22 @@
                 id="user-input" 
                 placeholder="Pregúntale a Paul..." 
                 autocomplete="off"
-                class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-sm focus:outline-none py-1.5 px-1 min-w-0"
+                class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-[15px] focus:outline-none py-2 px-1 min-w-0"
             >
+
+            <button type="button" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0" title="Dictado por voz">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+            </button>
 
             <button 
                 type="submit" 
                 id="send-btn"
-                class="bg-blue-600 hover:bg-blue-500 text-white p-2.5 rounded-full transition flex items-center justify-center shadow flex-shrink-0"
+                class="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900 p-2.5 rounded-full transition flex items-center justify-center flex-shrink-0"
             >
-                <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-7 7m7-7l7 7"></path></svg>
+                <svg class="w-5 h-5 transform rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-7 7m7-7l7 7"></path></svg>
             </button>
         </form>
-        <div id="file-indicator" class="text-[11px] text-blue-500 mt-1.5 hidden font-medium">📎 Archivo adjunto listo</div>
+        <div id="file-indicator" class="text-[11px] text-blue-500 mt-2 hidden font-medium absolute bottom-16 bg-[var(--bg-main)] px-3 py-1 rounded-full shadow-sm border border-[var(--border-color)]">📎 Archivo adjunto listo</div>
     </footer>
 
     <!-- Script de Gestión -->
@@ -235,7 +242,6 @@
         const chatForm = document.getElementById("chat-form");
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
-        const keysBtn = document.getElementById("keys-btn");
         const fileInput = document.getElementById("file-input");
         const fileIndicator = document.getElementById("file-indicator");
         const historyDrawer = document.getElementById("history-drawer");
@@ -254,15 +260,14 @@
         function checkKeysState() {
             const groqKey = localStorage.getItem('paul_groq_key');
             if (!groqKey || groqKey.trim() === '') {
-                keysBtn.classList.remove('hidden');
-            } else {
-                keysBtn.classList.add('hidden');
+                // Mostrar alerta sutil si no hay llave
+                setTimeout(() => alert("⚠️ Asegúrate de configurar tu API Key de Groq tocando el menú de tres puntos superior derecho."), 1000);
             }
         }
 
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         function updateThemeColor(e) {
-            document.getElementById('theme-color-meta').setAttribute('content', e.matches ? '#131314' : '#f8f9fa');
+            document.getElementById('theme-color-meta').setAttribute('content', e.matches ? '#131314' : '#ffffff');
         }
         darkModeMediaQuery.addEventListener('change', updateThemeColor);
         updateThemeColor(darkModeMediaQuery);
@@ -274,6 +279,7 @@
                 attachedFile = e.target.files[0];
                 fileIndicator.innerText = `📎 Adjunto: ${attachedFile.name}`;
                 fileIndicator.classList.remove('hidden');
+                setTimeout(() => fileIndicator.classList.add('hidden'), 3000);
             }
         });
 
@@ -284,7 +290,6 @@
                 const cleanKey = groqKey.trim();
                 if (cleanKey === '') {
                     localStorage.removeItem('paul_groq_key');
-                    checkKeysState();
                     alert("Se ha borrado la llave guardada.");
                     return;
                 }
@@ -293,7 +298,6 @@
                     return;
                 }
                 localStorage.setItem('paul_groq_key', cleanKey);
-                checkKeysState();
                 alert("¡Llave de Groq guardada correctamente!");
             }
         }
@@ -339,7 +343,7 @@
             localStorage.removeItem('paul_chat_history');
             chatHistory = [];
             chatContainer.innerHTML = '';
-            appendMessage('bot', '¡Hola! Soy Paul, ¿qué puedo hacer por ti?', null, false, null);
+            appendMessage('bot', '¡Hola! ¿En qué te puedo ayudar hoy?', null, false, null);
             toggleHistoryDrawer();
         }
 
@@ -363,7 +367,7 @@
         function renderStoredHistory() {
             chatContainer.innerHTML = '';
             if (chatHistory.length === 0) {
-                appendMessage('bot', '¡Hola! Soy Paul, ¿qué puedo hacer por ti?', null, false, null);
+                appendMessage('bot', '¡Hola! ¿En qué te puedo ayudar hoy?', null, false, null);
             } else {
                 chatHistory.forEach((msg, index) => {
                     appendMessage(msg.role, msg.content, null, false, index);
@@ -371,32 +375,25 @@
             }
         }
 
-        // --- FUNCIÓN MODIFICADA PARA EL ESTILO GEMINI ---
+        // --- FUNCIÓN DE MENSAJES ESTILO GEMINI ---
         function appendMessage(sender, text, fileObj = null, isTyping = false, historyIndex = null) {
             const isUser = sender === 'user' || sender === 'system';
             if (sender === 'system') return;
 
             const row = document.createElement('div');
-            // Si es el bot, alineamos a la izquierda sin avatar. Si es usuario, a la derecha.
             row.className = `flex w-full max-w-full ${isUser ? 'justify-end' : 'justify-start'}`;
             
-            // NOTA: Se eliminó el bloque que añadía el avatar <img> al lado de los mensajes del bot.
-
             const bubbleContainer = document.createElement('div');
-            // Ajustamos el ancho máximo y los márgenes
-            bubbleContainer.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1.5 min-w-0 max-w-[90%] sm:max-w-[85%]`;
+            bubbleContainer.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full`;
 
             const bubble = document.createElement('div');
-            // Usamos las clases CSS específicas para Gemini
-            bubble.className = `text-sm leading-relaxed markdown-content w-full overflow-hidden ${
-                isUser ? 'gemini-bubble-user' : 'gemini-bubble-ai'
-            }`;
+            bubble.className = `markdown-content ${isUser ? 'gemini-bubble-user' : 'gemini-bubble-ai'}`;
 
             if (fileObj) {
                 if (fileObj.type.startsWith('image/')) {
                     const img = document.createElement('img');
                     img.src = URL.createObjectURL(fileObj);
-                    img.className = "max-w-xs rounded-lg mb-2 shadow";
+                    img.className = "max-w-[200px] rounded-xl mb-2 shadow-sm";
                     bubble.appendChild(img);
                 } else {
                     const fileTag = document.createElement('div');
@@ -416,35 +413,37 @@
             }
             
             bubble.appendChild(textNode);
-            bubbleContainer.appendChild(bubble);
+            
+            // En Gemini, los mensajes de IA no tienen fondo, pero el texto va dentro del contenedor
+            if (isUser) {
+                bubbleContainer.appendChild(bubble);
+            } else {
+                // Para la IA, el texto va directamente y las acciones debajo
+                const aiTextWrapper = document.createElement('div');
+                aiTextWrapper.className = "w-full";
+                aiTextWrapper.appendChild(bubble);
+                bubbleContainer.appendChild(aiTextWrapper);
+            }
 
-            // Botones de acción (estilo Gemini: flotan justo debajo del texto)
+            // Botones de acción estilo Gemini
             if (!isTyping) {
                 const actionsBar = document.createElement('div');
-                actionsBar.className = "flex items-center gap-3 text-[var(--text-secondary)] px-1 mt-1";
+                actionsBar.className = "flex items-center gap-1 text-[var(--text-secondary)] mt-2 px-1";
 
                 if (isUser && historyIndex !== null) {
+                    // Botón de editar para el usuario (sutil)
                     const editBtn = document.createElement('button');
-                    editBtn.className = "hover:text-[var(--text-main)] transition p-1";
+                    editBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     editBtn.title = "Editar mensaje";
                     editBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`;
                     editBtn.onclick = () => editMessage(historyIndex);
                     actionsBar.appendChild(editBtn);
                 } else if (!isUser) {
-                    const retryBtn = document.createElement('button');
-                    retryBtn.className = "hover:text-[var(--text-main)] transition p-1";
-                    retryBtn.title = "Reintentar respuesta";
-                    retryBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>`;
-                    retryBtn.onclick = () => {
-                        if (historyIndex !== null && historyIndex > 0) {
-                            editMessage(historyIndex - 1);
-                        }
-                    };
-                    actionsBar.appendChild(retryBtn);
-
+                    // Iconos de Gemini para IA
+                    // Copiar
                     const copyBtn = document.createElement('button');
-                    copyBtn.className = "hover:text-[var(--text-main)] transition p-1";
-                    copyBtn.title = "Copiar texto";
+                    copyBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    copyBtn.title = "Copiar";
                     copyBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
                     copyBtn.onclick = () => {
                         navigator.clipboard.writeText(text);
@@ -454,8 +453,34 @@
                         }, 2000);
                     };
                     actionsBar.appendChild(copyBtn);
+
+                    // Pulgar arriba
+                    const thumbsUp = document.createElement('button');
+                    thumbsUp.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    thumbsUp.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714.211 1.412.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>`;
+                    actionsBar.appendChild(thumbsUp);
+
+                    // Pulgar abajo
+                    const thumbsDown = document.createElement('button');
+                    thumbsDown.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    thumbsDown.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715-.212-1.413-.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path></svg>`;
+                    actionsBar.appendChild(thumbsDown);
+
+                    // Más opciones (tres puntos)
+                    const moreBtn = document.createElement('button');
+                    moreBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    moreBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>`;
+                    actionsBar.appendChild(moreBtn);
                 }
                 bubbleContainer.appendChild(actionsBar);
+            }
+            
+            // Descargo de responsabilidad estilo Gemini
+            if (!isUser && !isTyping) {
+                const disclaimer = document.createElement('div');
+                disclaimer.className = "text-[11px] text-[var(--text-secondary)] mt-1 px-1 opacity-80";
+                disclaimer.innerText = "Paul es una IA y puede cometer errores.";
+                bubbleContainer.appendChild(disclaimer);
             }
             
             row.appendChild(bubbleContainer);
@@ -510,7 +535,7 @@
             try {
                 const apiKey = localStorage.getItem('paul_groq_key');
                 if (!apiKey) {
-                    throw new Error("Falta configurar tu API Key de Groq. Haz clic en el logo superior para ingresarla.");
+                    throw new Error("Falta configurar tu API Key de Groq. Toca el menú de tres puntos en la parte superior derecha.");
                 }
 
                 const apiMessages = [
