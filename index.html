@@ -268,21 +268,41 @@
         let chatHistory = JSON.parse(localStorage.getItem('paul_chat_history')) || [];
         let sessions = JSON.parse(localStorage.getItem('paul_sessions')) || [];
 
-        let userInteracted = false;
-        let userInteractionTimeout;
+        // --- VARIABLES PARA EL CONTROL DEL SCROLL ---
+        let userInteracted = false; // Indica si el usuario ha interactuado manualmente
+        let lastScrollTop = 0; // Para detectar la dirección del scroll
 
         checkKeysState();
         renderStoredHistory();
         updateHistoryDrawerList();
 
-        // --- CONTROL DEL SCROLL ---
+        // --- DETECCIÓN DE SCROLL MANUAL ---
+        chatContainer.addEventListener('scroll', () => {
+            const currentScrollTop = chatContainer.scrollTop;
+            const maxScrollTop = chatContainer.scrollHeight - chatContainer.clientHeight;
+            
+            // Si el usuario se aleja del fondo (hacia arriba), detenemos el auto-scroll
+            if (currentScrollTop < maxScrollTop - 50) {
+                userInteracted = true;
+            } 
+            // Si el usuario vuelve al fondo, reanudamos el auto-scroll
+            else if (currentScrollTop >= maxScrollTop - 50) {
+                userInteracted = false;
+            }
+            
+            lastScrollTop = currentScrollTop;
+        });
+
+        // Detectar si el usuario toca la pantalla para dar una pausa momentánea
         chatContainer.addEventListener('touchstart', () => { 
             userInteracted = true; 
-            clearTimeout(userInteractionTimeout);
         });
         
         chatContainer.addEventListener('touchend', () => { 
-            userInteractionTimeout = setTimeout(() => { userInteracted = false; }, 1000); 
+            // Solo reanudamos si el usuario está en el fondo
+            if (isScrolledToBottom()) {
+                userInteracted = false;
+            }
         });
 
         function isScrolledToBottom() {
@@ -629,7 +649,9 @@
                                     textContainer.innerHTML = marked.parse(fullResponse);
                                     
                                     // --- SCROLL INTELIGENTE ---
-                                    if (!userInteracted && isScrolledToBottom()) {
+                                    // Solo baja si el usuario NO ha interactuado manualmente
+                                    // O si el usuario ya está en el fondo del chat.
+                                    if (!userInteracted || isScrolledToBottom()) {
                                         setTimeout(() => {
                                             chatContainer.scrollTop = chatContainer.scrollHeight;
                                         }, 10);
