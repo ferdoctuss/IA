@@ -27,6 +27,7 @@
             --bubble-user-text: #1f1f1f;
             --input-bg: #f0f4f9;
             --input-border: transparent;
+            --card-bg: #f8fafd;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -40,6 +41,7 @@
                 --bubble-user-text: #e3e3e3;
                 --input-bg: #1e1f20;
                 --input-border: transparent;
+                --card-bg: #1e1f20;
             }
         }
 
@@ -71,11 +73,11 @@
             padding: 0 !important;
             color: var(--text-main);
             font-size: 1.05rem;
-            line-height: 1.7;
+            line-height: 1.65;
             width: 100%;
         }
 
-        /* Blindaje para que la burbuja del usuario nunca supere el 85% */
+        /* Burbuja del usuario limitada al 85% */
         .gemini-bubble-user {
             background-color: var(--bubble-user);
             color: var(--bubble-user-text);
@@ -85,12 +87,11 @@
             max-width: 100% !important;
             margin-left: auto;
             font-size: 1.05rem;
-            line-height: 1.5;
+            line-height: 1.45;
             word-break: break-word;
             overflow-wrap: break-word;
         }
 
-        /* Evita que marked.js agregue margen extra dentro de la burbuja del usuario */
         .gemini-bubble-user p {
             margin-bottom: 0 !important;
         }
@@ -111,8 +112,13 @@
             max-width: 100%;
         }
 
+        /* ELIMINA EL ESPACIO ENORME AL INICIO DE LA RESPUESTA */
+        .markdown-content > div > *:first-child {
+            margin-top: 0 !important;
+        }
+
         .markdown-content p {
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
         }
 
         .markdown-content p:last-child {
@@ -122,32 +128,33 @@
         .markdown-content h1,
         .markdown-content h2,
         .markdown-content h3 {
-            font-size: 1.4rem;
-            font-weight: 500;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-top: 1.4rem;
+            margin-bottom: 0.75rem;
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             letter-spacing: -0.02em;
+            line-height: 1.3;
         }
 
         .markdown-content ul {
             list-style-type: disc;
-            margin-left: 1.5rem;
-            margin-bottom: 1.5rem;
+            margin-left: 1.4rem;
+            margin-bottom: 1.2rem;
         }
 
         .markdown-content ol {
             list-style-type: decimal;
-            margin-left: 1.5rem;
-            margin-bottom: 1.5rem;
+            margin-left: 1.4rem;
+            margin-bottom: 1.2rem;
         }
 
         .markdown-content li {
-            margin-bottom: 0.8rem;
-            padding-left: 0.25rem;
+            margin-bottom: 0.6rem;
+            padding-left: 0.2rem;
         }
 
         .markdown-content strong {
@@ -167,7 +174,7 @@
             display: block;
             overflow-x: auto;
             white-space: nowrap;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
             border-collapse: collapse;
         }
 
@@ -176,6 +183,38 @@
             border: 1px solid var(--border-color);
             padding: 8px 12px;
             font-size: 0.9rem;
+        }
+
+        /* Tarjeta de Video de YouTube estilo Gemini */
+        .yt-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+
+        .yt-card:active {
+            transform: scale(0.98);
+        }
+
+        .yt-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #ff0000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.25);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -287,8 +326,8 @@
         </div>
     </header>
 
-    <!-- Contenedor del chat -->
-    <main id="chat-container" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-8 space-y-10 max-w-3xl w-full mx-auto"></main>
+    <!-- Contenedor del chat (Se redujo space-y-10 a space-y-5 para evitar huecos enormes) -->
+    <main id="chat-container" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 space-y-5 max-w-3xl w-full mx-auto"></main>
 
     <!-- Barra de entrada -->
     <footer class="p-3 bg-[var(--bg-main)] flex flex-col items-center transition-colors duration-300 relative flex-shrink-0 pb-6">
@@ -370,35 +409,27 @@
             }
         }
 
-        // Ordenador: la rueda hacia arriba pausa el seguimiento.
         chatContainer.addEventListener('wheel', (e) => {
             manualScrollGesture = true;
-
             if (e.deltaY < 0) {
                 userInteracted = true;
             }
         }, { passive: true });
 
-        // Móvil: registrar el inicio del gesto.
         chatContainer.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
             lastTouchY = touchStartY;
             manualScrollGesture = false;
         }, { passive: true });
 
-        // Móvil: detectar cuando el usuario desliza el dedo.
         chatContainer.addEventListener('touchmove', (e) => {
             const y = e.touches[0].clientY;
-
             if (Math.abs(y - touchStartY) > 8) {
                 manualScrollGesture = true;
-
-                // Si el dedo baja, el usuario está intentando leer mensajes anteriores.
                 if (y > lastTouchY && !isScrolledToBottom()) {
                     userInteracted = true;
                 }
             }
-
             lastTouchY = y;
         }, { passive: true });
 
@@ -414,7 +445,6 @@
             if (isScrolledToBottom()) {
                 userInteracted = false;
             }
-
             manualScrollGesture = false;
         }, { passive: true });
 
@@ -422,7 +452,6 @@
             if (isScrolledToBottom()) {
                 userInteracted = false;
             }
-
             manualScrollGesture = false;
         }, { passive: true });
 
@@ -600,6 +629,55 @@
             }
         }
 
+        // --- FORMATEADOR CON SOPORTE DE YOUTUBE ---
+        function formatMarkdownWithYouTube(rawText) {
+            if (!rawText) return '';
+
+            let ytQuery = null;
+
+            // Extraer etiqueta [YT: tema] si la IA la incluyó
+            const ytMatch = rawText.match(/\[YT:\s*(.+?)\]/i);
+            let cleanText = rawText.replace(/\[YT:\s*(.+?)\]/gi, '').trim();
+
+            if (ytMatch && ytMatch[1]) {
+                ytQuery = ytMatch[1].trim();
+            }
+
+            let html = marked.parse(cleanText);
+
+            // Si en el texto hay un link directo de YouTube con ID válido, incrustar el reproductor
+            const ytUrlRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
+            html = html.replace(ytUrlRegex, (match, videoId) => {
+                return `
+                <div class="my-3 rounded-2xl overflow-hidden shadow-md border border-[var(--border-color)] aspect-video w-full">
+                    <iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>`;
+            });
+
+            // Si la IA generó recomendación de video [YT: ...], mostrar tarjeta interactiva de YouTube
+            if (ytQuery) {
+                const searchUrl = `https://m.youtube.com/results?search_query=${encodeURIComponent(ytQuery)}`;
+                html += `
+                <a href="${searchUrl}" target="_blank" rel="noopener noreferrer" class="yt-card">
+                    <div class="yt-icon-box">
+                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-semibold text-red-500 uppercase tracking-wider">YouTube • Video recomendado</div>
+                        <div class="text-sm font-medium truncate mt-0.5">${ytQuery}</div>
+                        <div class="text-xs text-[var(--text-secondary)] mt-0.5">Toca para ver el video en YouTube</div>
+                    </div>
+                    <svg class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>`;
+            }
+
+            return html;
+        }
+
         // --- RENDERIZADO DE MENSAJES ---
         function appendMessage(sender, text, fileObj = null, isTyping = false, historyIndex = null) {
             const isUser = sender === 'user' || sender === 'system';
@@ -613,7 +691,6 @@
 
             const bubbleContainer = document.createElement('div');
 
-            // Contenedor limitado estrictamente al 85% para mensajes del usuario
             bubbleContainer.className =
                 `flex flex-col ${isUser ? 'items-end max-w-[85%]' : 'items-start w-full'}`;
 
@@ -647,7 +724,7 @@
                 textNode.innerHTML =
                     `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
             } else {
-                textNode.innerHTML = marked.parse(text);
+                textNode.innerHTML = isUser ? marked.parse(text) : formatMarkdownWithYouTube(text);
             }
 
             bubble.appendChild(textNode);
@@ -666,19 +743,20 @@
             if (!isTyping) {
                 const actionsBar = document.createElement('div');
 
+                // Menos margen en el botón del usuario (mt-1) para no empujar la respuesta hacia abajo
                 actionsBar.className =
-                    "flex items-center gap-1 text-[var(--text-secondary)] mt-3 px-1";
+                    `flex items-center gap-1 text-[var(--text-secondary)] ${isUser ? 'mt-1' : 'mt-2'} px-1`;
 
                 if (isUser && historyIndex !== null) {
                     const editBtn = document.createElement('button');
 
                     editBtn.className =
-                        "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                        "hover:text-[var(--text-main)] transition p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
 
                     editBtn.title = "Editar mensaje";
 
                     editBtn.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`;
+                        `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`;
 
                     editBtn.onclick = () => editMessage(historyIndex);
                     actionsBar.appendChild(editBtn);
@@ -696,7 +774,7 @@
 
                     copyBtn.onclick = async () => {
                         try {
-                            await navigator.clipboard.writeText(text);
+                            await navigator.clipboard.writeText(text.replace(/\[YT:\s*(.+?)\]/gi, '').trim());
 
                             copyBtn.innerHTML =
                                 `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>`;
@@ -844,9 +922,10 @@ REGLAS DE FORMATO OBLIGATORIAS:
 1. Para estructurar tus respuestas, SIEMPRE usa títulos de nivel 2 o 3 con formato Markdown (ejemplo: '## 📸 Título de sección' o '### ✍️ Otro título').
 2. Acompaña cada título con un emoji al inicio que represente la sección.
 3. Usa viñetas ('* ') para enumerar puntos dentro de las secciones. Evita usar listas numeradas (1. 2. 3.) a menos que sea estrictamente necesario (ej. pasos a seguir).
-4. Deja mucho espacio entre párrafos para que la lectura sea cómoda y visualmente espaciada, tal como lo hace Gemini.
+4. Deja espacio limpio entre párrafos para que la lectura sea cómoda.
 5. Usa **negritas** solo para resaltar palabras clave dentro de las viñetas.
-6. No uses introducciones robóticas. Sé cálido, colaborativo y directo.`;
+6. No uses introducciones robóticas. Sé cálido, colaborativo y directo.
+7. VIDEO DE YOUTUBE OBLIGATORIO EN TEMAS INFORMATIVOS: Cuando el usuario pregunte sobre historia, ciencia, tutoriales, tecnología, cultura o cualquier tema explicativo, incluye SIEMPRE al final de tu respuesta una línea con el formato exacto: [YT: título específico del video a buscar en YouTube]. Ejemplo: [YT: Cómo fue la conquista del Imperio Inca documental]`;
 
                 const apiMessages = [
                     {
@@ -921,10 +1000,8 @@ REGLAS DE FORMATO OBLIGATORIAS:
                                 fullResponse += content;
 
                                 textContainer.innerHTML =
-                                    marked.parse(fullResponse);
+                                    formatMarkdownWithYouTube(fullResponse);
 
-                                // Mantiene el final visible mientras se genera texto.
-                                // Si el usuario desliza hacia arriba, se pausa.
                                 requestAnimationFrame(() => {
                                     keepChatAtBottom();
                                 });
@@ -945,7 +1022,6 @@ REGLAS DE FORMATO OBLIGATORIAS:
                     JSON.stringify(chatHistory)
                 );
 
-                // Volver a renderizar al terminar el stream para que aparezcan los botones de copiar/acciones
                 renderStoredHistory();
 
             } catch (err) {
