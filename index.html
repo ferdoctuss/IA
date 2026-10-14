@@ -1,3 +1,10 @@
+Entendido. He eliminado por completo toda la lógica de Gemini, el menú de selección de proveedor y la configuración de su API Key. 
+
+El código ha vuelto a su estado anterior, dejando únicamente **Paul API 1 (Groq)** como el único proveedor. He mantenido las mejoras que ya habíamos logrado: el diseño estilo Gemini, el ancho de la burbuja ajustable, el control de scroll inteligente y el formateo de texto con títulos y emojis.
+
+Aquí tienes el código completo y limpio. Reemplaza tu `index.html`:
+
+```html
 <!DOCTYPE html>
 <html lang="es" class="h-full">
 <head>
@@ -166,9 +173,6 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-        
-        /* Menú desplegable del header */
-        .provider-menu-open { display: block !important; }
     </style>
 </head>
 <body class="flex flex-col justify-between h-full w-full">
@@ -200,27 +204,10 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             
-            <!-- Selector de Proveedor de IA -->
-            <div id="header-provider-clickable" class="flex items-center gap-1 cursor-pointer py-1.5 px-3 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition relative" onclick="toggleProviderMenu(event)">
-                <span id="header-provider-title" class="text-[17px] font-medium tracking-wide text-[var(--text-main)]">Paul API 1</span>
-                <span id="header-provider-subtitle" class="text-[17px] text-[var(--text-secondary)] font-normal">Groq</span>
-                <svg class="w-4 h-4 text-[var(--text-secondary)] ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                
-                <!-- Menú Desplegable -->
-                <div id="provider-menu" class="absolute top-12 left-0 mt-1 w-56 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl shadow-2xl hidden z-50 overflow-hidden">
-                    <button onclick="selectProvider('groq')" class="w-full text-left px-4 py-3 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-between">
-                        <span>Paul API 1 (Groq)</span>
-                        <span id="check-groq" class="text-blue-500 font-bold hidden">✓</span>
-                    </button>
-                    <button onclick="selectProvider('gemini')" class="w-full text-left px-4 py-3 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-between border-t border-[var(--border-color)]">
-                        <span>Paul API 2 (Gemini)</span>
-                        <span id="check-gemini" class="text-blue-500 font-bold hidden">✓</span>
-                    </button>
-                    <button onclick="configureKeys()" class="w-full text-left px-4 py-3 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition border-t border-[var(--border-color)] text-blue-500 font-medium flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Configurar API Keys
-                    </button>
-                </div>
+            <!-- Título estático -->
+            <div class="flex items-center gap-1 py-1.5 px-3">
+                <span class="text-[17px] font-medium tracking-wide text-[var(--text-main)]">Paul</span>
+                <span class="text-[17px] text-[var(--text-secondary)] font-normal">Flash</span>
             </div>
         </div>
 
@@ -283,8 +270,6 @@
         const historyDrawer = document.getElementById("history-drawer");
         const historyList = document.getElementById("history-list");
 
-        // --- VARIABLES DE ESTADO ---
-        let currentApiProvider = localStorage.getItem('paul_api_provider') || 'groq';
         let attachedFile = null;
 
         let chatHistory = JSON.parse(localStorage.getItem('paul_chat_history')) || [];
@@ -293,102 +278,11 @@
         let userInteracted = false;
         let userInteractionTimeout;
 
-        // Inicializar UI y estados
-        updateHeaderUI();
         checkKeysState();
         renderStoredHistory();
         updateHistoryDrawerList();
 
-        // --- LÓGICA DEL MENÚ DE PROVEEDOR ---
-        function toggleProviderMenu(event) {
-            event.stopPropagation();
-            const menu = document.getElementById('provider-menu');
-            menu.classList.toggle('hidden');
-        }
-
-        function selectProvider(provider) {
-            currentApiProvider = provider;
-            localStorage.setItem('paul_api_provider', provider);
-            updateHeaderUI();
-            document.getElementById('provider-menu').classList.add('hidden');
-        }
-
-        function updateHeaderUI() {
-            const titleEl = document.getElementById('header-provider-title');
-            const subEl = document.getElementById('header-provider-subtitle');
-            const checkGroq = document.getElementById('check-groq');
-            const checkGemini = document.getElementById('check-gemini');
-            
-            if (currentApiProvider === 'groq') {
-                titleEl.innerText = 'Paul API 1';
-                subEl.innerText = 'Groq';
-                if (checkGroq) checkGroq.classList.remove('hidden');
-                if (checkGemini) checkGemini.classList.add('hidden');
-            } else {
-                titleEl.innerText = 'Paul API 2';
-                subEl.innerText = 'Gemini';
-                if (checkGroq) checkGroq.classList.add('hidden');
-                if (checkGemini) checkGemini.classList.remove('hidden');
-            }
-        }
-
-        // Cerrar menú al hacer clic fuera
-        document.addEventListener('click', (event) => {
-            const menu = document.getElementById('provider-menu');
-            const header = document.getElementById('header-provider-clickable');
-            if (menu && !menu.classList.contains('hidden') && !header.contains(event.target)) {
-                menu.classList.add('hidden');
-            }
-        });
-
-        // --- CONFIGURACIÓN DE API KEYS ---
-        function configureKeys() {
-            document.getElementById('provider-menu').classList.add('hidden');
-            
-            const choice = prompt("¿Qué API Key deseas configurar?\n1. Groq (Paul API 1)\n2. Gemini (Paul API 2)\n\nEscribe el número:");
-            if (choice === null) return;
-            
-            if (choice === '1') {
-                const currentKey = localStorage.getItem('paul_groq_key') || '';
-                const groqKey = prompt("Ingresa tu API Key de Groq (empieza con gsk_):", currentKey);
-                if (groqKey !== null) {
-                    const cleanKey = groqKey.trim();
-                    if (cleanKey === '') {
-                        localStorage.removeItem('paul_groq_key');
-                        alert("Se ha borrado la llave de Groq.");
-                    } else if (!cleanKey.startsWith('gsk_')) {
-                        alert("⚠️ Una clave de Groq válida debe empezar con 'gsk_'.");
-                    } else {
-                        localStorage.setItem('paul_groq_key', cleanKey);
-                        alert("¡Llave de Groq guardada!");
-                    }
-                }
-            } else if (choice === '2') {
-                const currentKey = localStorage.getItem('paul_gemini_key') || '';
-                const geminiKey = prompt("Ingresa tu API Key de Gemini:", currentKey);
-                if (geminiKey !== null) {
-                    const cleanKey = geminiKey.trim();
-                    if (cleanKey === '') {
-                        localStorage.removeItem('paul_gemini_key');
-                        alert("Se ha borrado la llave de Gemini.");
-                    } else {
-                        localStorage.setItem('paul_gemini_key', cleanKey);
-                        alert("¡Llave de Gemini guardada!");
-                    }
-                }
-            }
-            updateHeaderUI();
-        }
-
-        function checkKeysState() {
-            const groqKey = localStorage.getItem('paul_groq_key');
-            const geminiKey = localStorage.getItem('paul_gemini_key');
-            if (!groqKey && !geminiKey) {
-                setTimeout(() => alert("⚠️ Asegúrate de configurar al menos una API Key tocando 'Paul API 1' en la cabecera."), 1000);
-            }
-        }
-
-        // --- SCROLL INTELIGENTE ---
+        // --- CONTROL DEL SCROLL ---
         chatContainer.addEventListener('touchstart', () => { 
             userInteracted = true; 
             clearTimeout(userInteractionTimeout);
@@ -400,6 +294,33 @@
 
         function isScrolledToBottom() {
             return chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 50;
+        }
+
+        // --- CONFIGURACIÓN DE API KEY (GROQ) ---
+        function configureKeys() {
+            const currentKey = localStorage.getItem('paul_groq_key') || '';
+            const groqKey = prompt("Ingresa tu API Key de Groq (empieza con gsk_):", currentKey);
+            if (groqKey !== null) {
+                const cleanKey = groqKey.trim();
+                if (cleanKey === '') {
+                    localStorage.removeItem('paul_groq_key');
+                    alert("Se ha borrado la llave guardada.");
+                    return;
+                }
+                if (!cleanKey.startsWith('gsk_')) {
+                    alert("⚠️ Una clave de Groq válida debe empezar con 'gsk_'. Por favor verifica tu llave.");
+                    return;
+                }
+                localStorage.setItem('paul_groq_key', cleanKey);
+                alert("¡Llave de Groq guardada correctamente!");
+            }
+        }
+
+        function checkKeysState() {
+            const groqKey = localStorage.getItem('paul_groq_key');
+            if (!groqKey || groqKey.trim() === '') {
+                setTimeout(() => alert("⚠️ Asegúrate de configurar tu API Key de Groq tocando el menú de tres puntos superior derecho."), 1000);
+            }
         }
 
         // --- MANEJO DE TEMA ---
@@ -589,7 +510,7 @@
             if (!isUser && !isTyping) {
                 const disclaimer = document.createElement('div');
                 disclaimer.className = "text-[11px] text-[var(--text-secondary)] mt-1 px-1 opacity-80";
-                disclaimer.innerText = currentApiProvider === 'groq' ? "Paul (Groq) es una IA y puede cometer errores." : "Paul (Gemini) es una IA y puede cometer errores.";
+                disclaimer.innerText = "Paul es una IA y puede cometer errores.";
                 bubbleContainer.appendChild(disclaimer);
             }
             
@@ -637,7 +558,7 @@
             await processAndSend(messageText, fileToSend);
         });
 
-        // --- PROCESAMIENTO PRINCIPAL DE LA IA (GROQ O GEMINI) ---
+        // --- PROCESAMIENTO PRINCIPAL DE LA IA (SOLO GROQ) ---
         async function processAndSend(messageText, fileToSend) {
             chatHistory.push({ role: "user", content: messageText });
             localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
@@ -648,6 +569,11 @@
             const textContainer = botBubbleContainer.querySelector('div');
 
             try {
+                const apiKey = localStorage.getItem('paul_groq_key');
+                if (!apiKey) {
+                    throw new Error("Falta configurar tu API Key de Groq. Toca el menú de tres puntos en la parte superior derecha.");
+                }
+
                 const systemPrompt = `Eres Paul, un asistente personal útil, directo, amigable y con un tono conversacional similar a Gemini.
                 
                 REGLAS DE FORMATO OBLIGATORIAS:
@@ -658,46 +584,21 @@
                 5. Usa **negritas** solo para resaltar palabras clave dentro de las viñetas.
                 6. No uses introducciones robóticas. Sé cálido, colaborativo y directo.`;
 
-                let apiUrl, headers, requestBody;
-                
-                // CONFIGURACIÓN SEGÚN EL PROVEEDOR SELECCIONADO
-                if (currentApiProvider === 'groq') {
-                    const apiKey = localStorage.getItem('paul_groq_key');
-                    if (!apiKey) {
-                        throw new Error("Falta configurar tu API Key de Groq. Toca 'Paul API 1' en la cabecera.");
-                    }
-                    apiUrl = "https://api.groq.com/openai/v1/chat/completions";
-                    headers = { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    };
-                    requestBody = {
-                        model: "openai/gpt-oss-120b",
-                        messages: [
-                            { role: "system", content: systemPrompt },
-                            ...chatHistory.map(m => ({ role: m.role, content: m.content }))
-                        ],
-                        stream: true
-                    };
-                } else {
-                    const apiKey = localStorage.getItem('paul_gemini_key');
-                    if (!apiKey) {
-                        throw new Error("Falta configurar tu API Key de Gemini. Toca 'Paul API 2' en la cabecera.");
-                    }
-                    // --- MODELO ACTUALIZADO ---
-                    apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${apiKey}`;
-                    headers = { 'Content-Type': 'application/json' };
-                    
-                    const geminiContents = chatHistory.map(m => ({
-                        role: m.role === 'assistant' ? 'model' : 'user',
-                        parts: [{ text: m.content }]
-                    }));
+                const apiMessages = [
+                    { role: "system", content: systemPrompt },
+                    ...chatHistory.map(m => ({ role: m.role, content: m.content }))
+                ];
 
-                    requestBody = {
-                        contents: geminiContents,
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
-                    };
-                }
+                const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+                const headers = { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                };
+                const requestBody = {
+                    model: "openai/gpt-oss-120b",
+                    messages: apiMessages,
+                    stream: true
+                };
 
                 const response = await fetch(apiUrl, {
                     method: 'POST',
@@ -707,8 +608,7 @@
 
                 if (!response.ok) {
                     const errData = await response.json();
-                    const errMsg = errData.error?.message || errData.error?.details?.[0]?.reason || "Error en la solicitud";
-                    throw new Error(errMsg);
+                    throw new Error(errData.error?.message || "Error en la red");
                 }
 
                 const reader = response.body.getReader();
@@ -720,58 +620,35 @@
                     if (done) break;
 
                     const chunk = decoder.decode(value, { stream: true });
-                    
-                    // --- CORRECCIÓN DE PARSEO PARA GEMINI ---
-                    if (currentApiProvider === 'gemini') {
-                        try {
-                            // El chunk puede contener múltiples objetos JSON en un array
-                            const parsedChunks = JSON.parse(chunk);
-                            for (const parsed of parsedChunks) {
-                                const content = parsed.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    const lines = chunk.split("\n");
+
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (trimmed.startsWith("data: ")) {
+                            const jsonStr = trimmed.replace("data: ", "");
+                            if (jsonStr === "[DONE]") continue;
+
+                            try {
+                                const parsed = JSON.parse(jsonStr);
+                                const content = parsed.choices[0]?.delta?.content || "";
                                 if (content) {
                                     fullResponse += content;
                                     textContainer.innerHTML = marked.parse(fullResponse);
                                     
+                                    // --- SCROLL INTELIGENTE ---
                                     if (!userInteracted && isScrolledToBottom()) {
                                         setTimeout(() => {
                                             chatContainer.scrollTop = chatContainer.scrollHeight;
                                         }, 10);
                                     }
                                 }
-                            }
-                        } catch (e) {
-                            // Si el chunk no es un JSON válido (raro en Gemini), lo ignoramos
-                        }
-                    } else {
-                        // Formato estándar para Groq/OpenAI
-                        const lines = chunk.split("\n");
-                        for (const line of lines) {
-                            const trimmed = line.trim();
-                            if (trimmed.startsWith("data: ")) {
-                                const jsonStr = trimmed.replace("data: ", "");
-                                if (jsonStr === "[DONE]") continue;
-                                try {
-                                    const parsed = JSON.parse(jsonStr);
-                                    const content = parsed.choices[0]?.delta?.content || "";
-                                    if (content) {
-                                        fullResponse += content;
-                                        textContainer.innerHTML = marked.parse(fullResponse);
-                                        
-                                        if (!userInteracted && isScrolledToBottom()) {
-                                            setTimeout(() => {
-                                                chatContainer.scrollTop = chatContainer.scrollHeight;
-                                            }, 10);
-                                        }
-                                    }
-                                } catch (e) {}
-                            }
+                            } catch (e) {}
                         }
                     }
                 }
 
                 chatHistory.push({ role: "assistant", content: fullResponse });
                 localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
-                renderStoredHistory(); 
 
             } catch (err) {
                 console.error(err);
