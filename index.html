@@ -57,8 +57,7 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         .gemini-header {
@@ -223,30 +222,24 @@
 <body class="flex flex-col justify-between h-full w-full">
 
     <!-- Panel lateral de historial -->
-    <div id="history-drawer"
-         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden transition-opacity duration-300 flex justify-start">
-
+    <div id="history-drawer" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden transition-opacity duration-300 flex justify-start">
         <div class="w-80 h-full bg-[var(--bg-main)] border-r border-[var(--border-color)] flex flex-col p-4 shadow-2xl transition-transform duration-300">
 
             <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
                 <h2 class="font-medium text-base">Historial de Chats</h2>
 
-                <button onclick="toggleHistoryDrawer()"
-                        class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                         stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M6 18L18 6M6 6l12 12"></path>
+                <button onclick="toggleHistoryDrawer()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
 
-            <button onclick="startNewChat()"
-                    class="mt-4 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium text-sm transition shadow flex items-center justify-center gap-2">
+            <button onclick="startNewChat()" class="mt-4 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium text-sm transition shadow flex items-center justify-center gap-2">
                 <span>+ Nuevo chat</span>
             </button>
 
-            <div id="history-list"
-                 class="flex-1 overflow-y-auto mt-4 space-y-2"></div>
+            <div id="history-list" class="flex-1 overflow-y-auto mt-4 space-y-2"></div>
         </div>
 
         <div class="flex-1" onclick="toggleHistoryDrawer()"></div>
@@ -256,12 +249,9 @@
     <header class="gemini-header flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)] select-none z-20 transition-colors duration-300 flex-shrink-0 relative">
 
         <div class="flex items-center gap-2">
-            <button onclick="toggleHistoryDrawer()"
-                    class="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0"
-                    title="Historial">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                     stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"></path>
+            <button onclick="toggleHistoryDrawer()" class="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0" title="Historial">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
 
@@ -274,77 +264,64 @@
         <div class="flex items-center gap-2 flex-shrink-0">
             <div class="flex items-center border border-[var(--border-color)] rounded-full bg-[var(--bg-main)] overflow-hidden">
 
-                <button onclick="startNewChat()"
-                        class="p-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]"
-                        title="Nuevo chat">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                         stroke-width="1.5" viewBox="0 0 24 24">
-                        <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path>
+                <button onclick="startNewChat()" class="p-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]" title="Nuevo chat">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path>
                     </svg>
                 </button>
 
-                <button onclick="configureKeys()"
-                        class="p-2.5 border-l border-[var(--border-color)] hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]"
-                        title="Configurar API Key">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                         stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                <button onclick="configureKeys()" class="p-2.5 border-l border-[var(--border-color)] hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]" title="Configurar API Key">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                     </svg>
                 </button>
+
             </div>
         </div>
     </header>
 
     <!-- Contenedor del chat -->
-    <main id="chat-container"
-          class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-8 space-y-10 max-w-3xl w-full mx-auto"></main>
+    <main id="chat-container" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-8 space-y-10 max-w-3xl w-full mx-auto"></main>
 
-    <!-- Barra inferior de entrada -->
+    <!-- Barra de entrada -->
     <footer class="p-3 bg-[var(--bg-main)] flex flex-col items-center transition-colors duration-300 relative flex-shrink-0 pb-6">
 
-        <form id="chat-form"
-              class="gemini-input-container w-full max-w-3xl rounded-[28px] px-2 py-1.5 flex items-center gap-1 shadow-sm">
+        <form id="chat-form" class="gemini-input-container w-full max-w-3xl rounded-[28px] px-2 py-1.5 flex items-center gap-1 shadow-sm">
 
-            <input type="file" id="file-input" class="hidden"
-                   accept="image/*,.pdf,.txt,.doc,.docx">
+            <input type="file" id="file-input" class="hidden" accept="image/*,.pdf,.txt,.doc,.docx">
 
-            <button type="button"
-                    onclick="document.getElementById('file-input').click()"
-                    class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0"
-                    title="Adjuntar archivo">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor"
-                     stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M12 4v16m8-8H4"></path>
+            <button type="button" onclick="document.getElementById('file-input').click()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0" title="Adjuntar archivo">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
                 </svg>
             </button>
 
-            <input type="text"
-                   id="user-input"
-                   placeholder="Pregúntale a Paul..."
-                   autocomplete="off"
-                   class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-[15px] focus:outline-none py-2 px-1 min-w-0">
+            <input
+                type="text"
+                id="user-input"
+                placeholder="Pregúntale a Paul..."
+                autocomplete="off"
+                class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-[15px] focus:outline-none py-2 px-1 min-w-0"
+            >
 
-            <button type="button"
-                    class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0"
-                    title="Dictado por voz">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                     stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+            <button type="button" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0" title="Dictado por voz">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
                 </svg>
             </button>
 
-            <button type="submit"
-                    id="send-btn"
-                    class="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900 p-2.5 rounded-full transition flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 transform rotate-90" fill="none"
-                     stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path d="M12 19V5m0 0l-7 7m7-7l7 7"></path>
+            <button
+                type="submit"
+                id="send-btn"
+                class="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900 p-2.5 rounded-full transition flex items-center justify-center flex-shrink-0"
+            >
+                <svg class="w-5 h-5 transform rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-7 7m7-7l7 7"></path>
                 </svg>
             </button>
         </form>
 
-        <div id="file-indicator"
-             class="text-[11px] text-blue-500 mt-2 hidden font-medium absolute bottom-16 bg-[var(--bg-main)] px-3 py-1 rounded-full shadow-sm border border-[var(--border-color)]">
+        <div id="file-indicator" class="text-[11px] text-blue-500 mt-2 hidden font-medium absolute bottom-16 bg-[var(--bg-main)] px-3 py-1 rounded-full shadow-sm border border-[var(--border-color)]">
             📎 Archivo adjunto listo
         </div>
     </footer>
@@ -362,86 +339,89 @@
 
         let attachedFile = null;
 
-        let chatHistory =
-            JSON.parse(localStorage.getItem("paul_chat_history")) || [];
+        let chatHistory = JSON.parse(localStorage.getItem('paul_chat_history')) || [];
+        let sessions = JSON.parse(localStorage.getItem('paul_sessions')) || [];
 
-        let sessions =
-            JSON.parse(localStorage.getItem("paul_sessions")) || [];
-
-        // ============================================
-        // CONTROL DEL SCROLL AUTOMÁTICO
-        // ============================================
-
+        // --- CONTROL DEL SCROLL AUTOMÁTICO ---
         let userInteracted = false;
-        let isTouchingChat = false;
         let touchStartY = 0;
+        let lastTouchY = 0;
+        let manualScrollGesture = false;
 
         checkKeysState();
         renderStoredHistory();
         updateHistoryDrawerList();
 
-        // Tocar sin mover el dedo no detiene el scroll.
-        chatContainer.addEventListener("touchstart", (e) => {
-            isTouchingChat = true;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        // Detecta los movimientos del dedo.
-        chatContainer.addEventListener("touchmove", (e) => {
-            const currentY = e.touches[0].clientY;
-
-            if (Math.abs(currentY - touchStartY) > 8) {
-                touchStartY = currentY;
-            }
-        }, { passive: true });
-
-        // Al levantar el dedo, comprueba si estamos al final.
-        chatContainer.addEventListener("touchend", () => {
-            isTouchingChat = false;
-
-            if (isScrolledToBottom()) {
-                userInteracted = false;
-            }
-        }, { passive: true });
-
-        chatContainer.addEventListener("touchcancel", () => {
-            isTouchingChat = false;
-
-            if (isScrolledToBottom()) {
-                userInteracted = false;
-            }
-        }, { passive: true });
-
-        // Si la persona se aleja del final, se pausa el auto-scroll.
-        // Si vuelve al final, se reanuda.
-        chatContainer.addEventListener("scroll", () => {
-            if (isScrolledToBottom()) {
-                userInteracted = false;
-            } else {
-                userInteracted = true;
-            }
-        }, { passive: true });
-
         function isScrolledToBottom() {
-            return chatContainer.scrollHeight -
-                chatContainer.scrollTop <=
-                chatContainer.clientHeight + 50;
+            return chatContainer.scrollHeight - chatContainer.scrollTop
+                <= chatContainer.clientHeight + 50;
         }
 
-        // Baja al final únicamente cuando el seguimiento está activo.
         function keepChatAtBottom() {
             if (!userInteracted) {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
         }
 
-        // ============================================
-        // CONFIGURACIÓN DE API KEY (GROQ)
-        // ============================================
+        // Ordenador: la rueda hacia arriba pausa el seguimiento.
+        chatContainer.addEventListener('wheel', (e) => {
+            manualScrollGesture = true;
 
+            if (e.deltaY < 0) {
+                userInteracted = true;
+            }
+        }, { passive: true });
+
+        // Móvil: registrar el inicio del gesto.
+        chatContainer.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            lastTouchY = touchStartY;
+            manualScrollGesture = false;
+        }, { passive: true });
+
+        // Móvil: detectar cuando el usuario desliza el dedo.
+        chatContainer.addEventListener('touchmove', (e) => {
+            const y = e.touches[0].clientY;
+
+            if (Math.abs(y - touchStartY) > 8) {
+                manualScrollGesture = true;
+
+                // Si el dedo baja, el usuario está intentando leer mensajes anteriores.
+                if (y > lastTouchY && !isScrolledToBottom()) {
+                    userInteracted = true;
+                }
+            }
+
+            lastTouchY = y;
+        }, { passive: true });
+
+        chatContainer.addEventListener('scroll', () => {
+            if (isScrolledToBottom()) {
+                userInteracted = false;
+            } else if (manualScrollGesture) {
+                userInteracted = true;
+            }
+        }, { passive: true });
+
+        chatContainer.addEventListener('touchend', () => {
+            if (isScrolledToBottom()) {
+                userInteracted = false;
+            }
+
+            manualScrollGesture = false;
+        }, { passive: true });
+
+        chatContainer.addEventListener('touchcancel', () => {
+            if (isScrolledToBottom()) {
+                userInteracted = false;
+            }
+
+            manualScrollGesture = false;
+        }, { passive: true });
+
+        // --- CONFIGURACIÓN DE API KEY ---
         function configureKeys() {
-            const currentKey =
-                localStorage.getItem("paul_groq_key") || "";
+            const currentKey = localStorage.getItem('paul_groq_key') || '';
 
             const groqKey = prompt(
                 "Ingresa tu API Key de Groq (empieza con gsk_):",
@@ -451,100 +431,79 @@
             if (groqKey !== null) {
                 const cleanKey = groqKey.trim();
 
-                if (cleanKey === "") {
-                    localStorage.removeItem("paul_groq_key");
+                if (cleanKey === '') {
+                    localStorage.removeItem('paul_groq_key');
                     alert("Se ha borrado la llave guardada.");
                     return;
                 }
 
-                if (!cleanKey.startsWith("gsk_")) {
-                    alert(
-                        "⚠️ Una clave de Groq válida debe empezar con 'gsk_'. Por favor verifica tu llave."
-                    );
+                if (!cleanKey.startsWith('gsk_')) {
+                    alert("⚠️ Una clave de Groq válida debe empezar con 'gsk_'. Por favor verifica tu llave.");
                     return;
                 }
 
-                localStorage.setItem("paul_groq_key", cleanKey);
+                localStorage.setItem('paul_groq_key', cleanKey);
                 alert("¡Llave de Groq guardada correctamente!");
             }
         }
 
         function checkKeysState() {
-            const groqKey = localStorage.getItem("paul_groq_key");
+            const groqKey = localStorage.getItem('paul_groq_key');
 
-            if (!groqKey || groqKey.trim() === "") {
+            if (!groqKey || groqKey.trim() === '') {
                 setTimeout(() => {
-                    alert(
-                        "⚠️ Asegúrate de configurar tu API Key de Groq tocando el menú de tres puntos superior derecho."
-                    );
+                    alert("⚠️ Asegúrate de configurar tu API Key de Groq tocando el menú de tres puntos superior derecho.");
                 }, 1000);
             }
         }
 
-        // ============================================
-        // MANEJO DEL TEMA
-        // ============================================
-
-        const darkModeMediaQuery =
-            window.matchMedia("(prefers-color-scheme: dark)");
+        // --- MANEJO DEL TEMA ---
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
         function updateThemeColor(e) {
-            document.getElementById("theme-color-meta")
-                .setAttribute(
-                    "content",
-                    e.matches ? "#131314" : "#ffffff"
-                );
+            document.getElementById('theme-color-meta').setAttribute(
+                'content',
+                e.matches ? '#131314' : '#ffffff'
+            );
         }
 
-        darkModeMediaQuery.addEventListener("change", updateThemeColor);
+        darkModeMediaQuery.addEventListener('change', updateThemeColor);
         updateThemeColor(darkModeMediaQuery);
 
-        document.addEventListener("gesturestart", (e) => {
-            e.preventDefault();
-        });
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
 
-        fileInput.addEventListener("change", (e) => {
+        fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 attachedFile = e.target.files[0];
 
-                fileIndicator.innerText =
-                    `📎 Adjunto: ${attachedFile.name}`;
-
-                fileIndicator.classList.remove("hidden");
+                fileIndicator.innerText = `📎 Adjunto: ${attachedFile.name}`;
+                fileIndicator.classList.remove('hidden');
 
                 setTimeout(() => {
-                    fileIndicator.classList.add("hidden");
+                    fileIndicator.classList.add('hidden');
                 }, 3000);
             }
         });
 
-        // ============================================
-        // HISTORIAL Y SESIONES
-        // ============================================
-
+        // --- HISTORIAL Y SESIONES ---
         function toggleHistoryDrawer() {
-            historyDrawer.classList.toggle("hidden");
+            historyDrawer.classList.toggle('hidden');
             updateHistoryDrawerList();
         }
 
         function updateHistoryDrawerList() {
-            historyList.innerHTML = "";
+            historyList.innerHTML = '';
 
             if (chatHistory.length > 0) {
-                const currentSessionBtn =
-                    document.createElement("div");
+                const currentSessionBtn = document.createElement('div');
 
                 currentSessionBtn.className =
                     "p-3 rounded-xl bg-black/5 dark:bg-white/5 cursor-pointer text-sm font-medium truncate flex items-center justify-between";
 
-                const firstUserMsg =
-                    chatHistory.find(m => m.role === "user");
+                const firstUserMsg = chatHistory.find(m => m.role === 'user');
 
                 currentSessionBtn.innerHTML =
-                    `<span>💬 ${firstUserMsg
-                        ? firstUserMsg.content.substring(0, 25) + "..."
-                        : "Chat actual"}</span>
-                    <span class="text-xs text-blue-500">Activo</span>`;
+                    `<span>💬 ${firstUserMsg ? firstUserMsg.content.substring(0, 25) + '...' : 'Chat actual'}</span> <span class="text-xs text-blue-500">Activo</span>`;
 
                 historyList.appendChild(currentSessionBtn);
             }
@@ -556,14 +515,12 @@
             }
 
             sessions.forEach((session, idx) => {
-                const item = document.createElement("div");
+                const item = document.createElement('div');
 
                 item.className =
                     "p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer text-sm truncate flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--text-main)] transition";
 
-                item.innerHTML =
-                    `<span>🗨️ ${session.title || "Conversación anterior"}</span>`;
-
+                item.innerHTML = `<span>🗨️ ${session.title || 'Conversación anterior'}</span>`;
                 item.onclick = () => loadSession(idx);
 
                 historyList.appendChild(item);
@@ -572,40 +529,26 @@
 
         function startNewChat() {
             if (chatHistory.length > 0) {
-                const firstMsg =
-                    chatHistory.find(m => m.role === "user");
+                const firstMsg = chatHistory.find(m => m.role === 'user');
 
                 const title = firstMsg
-                    ? firstMsg.content.substring(0, 25) + "..."
-                    : "Chat anterior";
+                    ? firstMsg.content.substring(0, 25) + '...'
+                    : 'Chat anterior';
 
                 sessions.unshift({
                     title,
                     history: [...chatHistory]
                 });
 
-                localStorage.setItem(
-                    "paul_sessions",
-                    JSON.stringify(sessions)
-                );
+                localStorage.setItem('paul_sessions', JSON.stringify(sessions));
             }
 
-            localStorage.removeItem("paul_chat_history");
-
+            localStorage.removeItem('paul_chat_history');
             chatHistory = [];
-            chatContainer.innerHTML = "";
-
-            // Restablece el seguimiento automático en el nuevo chat.
             userInteracted = false;
+            chatContainer.innerHTML = '';
 
-            appendMessage(
-                "bot",
-                "¡Hola! ¿En qué te puedo ayudar hoy!",
-                null,
-                false,
-                null
-            );
-
+            appendMessage('bot', '¡Hola! ¿En qué te puedo ayudar hoy?', null, false, null);
             toggleHistoryDrawer();
         }
 
@@ -614,12 +557,11 @@
 
             if (session) {
                 if (chatHistory.length > 0) {
-                    const firstMsg =
-                        chatHistory.find(m => m.role === "user");
+                    const firstMsg = chatHistory.find(m => m.role === 'user');
 
                     const title = firstMsg
-                        ? firstMsg.content.substring(0, 25) + "..."
-                        : "Chat anterior";
+                        ? firstMsg.content.substring(0, 25) + '...'
+                        : 'Chat anterior';
 
                     sessions.unshift({
                         title,
@@ -630,118 +572,72 @@
                 chatHistory = [...session.history];
                 sessions.splice(idx, 1);
 
-                localStorage.setItem(
-                    "paul_sessions",
-                    JSON.stringify(sessions)
-                );
-
-                localStorage.setItem(
-                    "paul_chat_history",
-                    JSON.stringify(chatHistory)
-                );
+                localStorage.setItem('paul_sessions', JSON.stringify(sessions));
+                localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
 
                 userInteracted = false;
-
                 renderStoredHistory();
                 toggleHistoryDrawer();
             }
         }
 
         function renderStoredHistory() {
-            chatContainer.innerHTML = "";
+            chatContainer.innerHTML = '';
 
             if (chatHistory.length === 0) {
-                appendMessage(
-                    "bot",
-                    "¡Hola! ¿En qué te puedo ayudar hoy?",
-                    null,
-                    false,
-                    null
-                );
+                appendMessage('bot', '¡Hola! ¿En qué te puedo ayudar hoy?', null, false, null);
             } else {
                 chatHistory.forEach((msg, index) => {
-                    appendMessage(
-                        msg.role,
-                        msg.content,
-                        null,
-                        false,
-                        index
-                    );
+                    appendMessage(msg.role, msg.content, null, false, index);
                 });
             }
-
-            keepChatAtBottom();
         }
 
-        // ============================================
-        // RENDERIZADO DE MENSAJES
-        // ============================================
+        // --- RENDERIZADO DE MENSAJES ---
+        function appendMessage(sender, text, fileObj = null, isTyping = false, historyIndex = null) {
+            const isUser = sender === 'user' || sender === 'system';
 
-        function appendMessage(
-            sender,
-            text,
-            fileObj = null,
-            isTyping = false,
-            historyIndex = null
-        ) {
-            const isUser =
-                sender === "user" || sender === "system";
+            if (sender === 'system') return;
 
-            if (sender === "system") return;
-
-            const row = document.createElement("div");
+            const row = document.createElement('div');
 
             row.className =
-                `flex w-full max-w-full ${
-                    isUser ? "justify-end" : "justify-start"
-                }`;
+                `flex w-full max-w-full ${isUser ? 'justify-end' : 'justify-start'}`;
 
-            const bubbleContainer =
-                document.createElement("div");
+            const bubbleContainer = document.createElement('div');
 
             bubbleContainer.className =
-                `flex flex-col ${
-                    isUser ? "items-end w-fit" : "items-start w-full"
-                }`;
+                `flex flex-col ${isUser ? 'items-end w-fit' : 'items-start w-full'}`;
 
-            const bubble = document.createElement("div");
+            const bubble = document.createElement('div');
 
             bubble.className =
-                `markdown-content ${
-                    isUser ? "gemini-bubble-user" : "gemini-bubble-ai"
-                }`;
+                `markdown-content ${isUser ? 'gemini-bubble-user' : 'gemini-bubble-ai'}`;
 
             if (fileObj) {
-                if (fileObj.type.startsWith("image/")) {
-                    const img = document.createElement("img");
+                if (fileObj.type.startsWith('image/')) {
+                    const img = document.createElement('img');
 
                     img.src = URL.createObjectURL(fileObj);
-                    img.className =
-                        "max-w-[200px] rounded-xl mb-2 shadow-sm";
+                    img.className = "max-w-[200px] rounded-xl mb-2 shadow-sm";
 
                     bubble.appendChild(img);
                 } else {
-                    const fileTag =
-                        document.createElement("div");
+                    const fileTag = document.createElement('div');
 
-                    fileTag.className =
-                        "text-xs opacity-80 mb-1 font-semibold";
-
-                    fileTag.innerText =
-                        `📄 Archivo: ${fileObj.name}`;
+                    fileTag.className = "text-xs opacity-80 mb-1 font-semibold";
+                    fileTag.innerText = `📄 Archivo: ${fileObj.name}`;
 
                     bubble.appendChild(fileTag);
                 }
             }
 
-            const textNode = document.createElement("div");
+            const textNode = document.createElement('div');
             textNode.className = "overflow-x-auto";
 
             if (isTyping) {
                 textNode.innerHTML =
-                    `<span class="typing-dot"></span>
-                     <span class="typing-dot"></span>
-                     <span class="typing-dot"></span>`;
+                    `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
             } else {
                 textNode.innerHTML = marked.parse(text);
             }
@@ -751,24 +647,22 @@
             if (isUser) {
                 bubbleContainer.appendChild(bubble);
             } else {
-                const aiTextWrapper =
-                    document.createElement("div");
+                const aiTextWrapper = document.createElement('div');
 
                 aiTextWrapper.className = "w-full";
                 aiTextWrapper.appendChild(bubble);
+
                 bubbleContainer.appendChild(aiTextWrapper);
             }
 
             if (!isTyping) {
-                const actionsBar =
-                    document.createElement("div");
+                const actionsBar = document.createElement('div');
 
                 actionsBar.className =
                     "flex items-center gap-1 text-[var(--text-secondary)] mt-3 px-1";
 
                 if (isUser && historyIndex !== null) {
-                    const editBtn =
-                        document.createElement("button");
+                    const editBtn = document.createElement('button');
 
                     editBtn.className =
                         "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
@@ -776,16 +670,13 @@
                     editBtn.title = "Editar mensaje";
 
                     editBtn.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                        </svg>`;
+                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`;
 
                     editBtn.onclick = () => editMessage(historyIndex);
                     actionsBar.appendChild(editBtn);
 
                 } else if (!isUser) {
-                    const copyBtn =
-                        document.createElement("button");
+                    const copyBtn = document.createElement('button');
 
                     copyBtn.className =
                         "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
@@ -793,66 +684,53 @@
                     copyBtn.title = "Copiar";
 
                     copyBtn.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
-                        </svg>`;
+                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
 
-                    copyBtn.onclick = () => {
-                        navigator.clipboard.writeText(text);
+                    copyBtn.onclick = async () => {
+                        try {
+                            await navigator.clipboard.writeText(text);
 
-                        copyBtn.innerHTML =
-                            `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M5 13l4 4L19 7"></path>
-                            </svg>`;
-
-                        setTimeout(() => {
                             copyBtn.innerHTML =
-                                `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
-                                </svg>`;
-                        }, 2000);
+                                `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>`;
+
+                            setTimeout(() => {
+                                copyBtn.innerHTML =
+                                    `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
+                            }, 2000);
+                        } catch (error) {
+                            console.error("No se pudo copiar el mensaje:", error);
+                        }
                     };
 
                     actionsBar.appendChild(copyBtn);
 
-                    const thumbsUp =
-                        document.createElement("button");
+                    const thumbsUp = document.createElement('button');
 
                     thumbsUp.className =
                         "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
 
                     thumbsUp.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714.211 1.412.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
-                        </svg>`;
+                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714.211 1.412.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>`;
 
                     actionsBar.appendChild(thumbsUp);
 
-                    const thumbsDown =
-                        document.createElement("button");
+                    const thumbsDown = document.createElement('button');
 
                     thumbsDown.className =
                         "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
 
                     thumbsDown.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.212-0.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path>
-                        </svg>`;
+                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904-.212-1.413-.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path></svg>`;
 
                     actionsBar.appendChild(thumbsDown);
 
-                    const moreBtn =
-                        document.createElement("button");
+                    const moreBtn = document.createElement('button');
 
                     moreBtn.className =
                         "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
 
                     moreBtn.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                        </svg>`;
+                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>`;
 
                     actionsBar.appendChild(moreBtn);
                 }
@@ -861,14 +739,12 @@
             }
 
             if (!isUser && !isTyping) {
-                const disclaimer =
-                    document.createElement("div");
+                const disclaimer = document.createElement('div');
 
                 disclaimer.className =
                     "text-[11px] text-[var(--text-secondary)] mt-1 px-1 opacity-80";
 
-                disclaimer.innerText =
-                    "Paul es una IA y puede cometer errores.";
+                disclaimer.innerText = "Paul es una IA y puede cometer errores.";
 
                 bubbleContainer.appendChild(disclaimer);
             }
@@ -883,38 +759,26 @@
             return bubble;
         }
 
-        // ============================================
-        // EDITAR MENSAJES
-        // ============================================
-
         async function editMessage(index) {
             const oldMsg = chatHistory[index];
 
-            if (!oldMsg || oldMsg.role !== "user") return;
+            if (!oldMsg || oldMsg.role !== 'user') return;
 
-            const newText = prompt(
-                "Edita tu mensaje:",
-                oldMsg.content
-            );
+            const newText = prompt("Edita tu mensaje:", oldMsg.content);
 
-            if (newText === null || newText.trim() === "") return;
+            if (newText === null || newText.trim() === '') return;
 
             chatHistory = chatHistory.slice(0, index);
 
             localStorage.setItem(
-                "paul_chat_history",
+                'paul_chat_history',
                 JSON.stringify(chatHistory)
             );
 
-            userInteracted = false;
             renderStoredHistory();
 
             await processAndSend(newText.trim(), null);
         }
-
-        // ============================================
-        // ENVIAR MENSAJES
-        // ============================================
 
         chatForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -927,48 +791,38 @@
             userInput.value = "";
             attachedFile = null;
 
-            fileIndicator.classList.add("hidden");
+            fileIndicator.classList.add('hidden');
             fileInput.value = "";
 
             let messageText = text;
 
             if (fileToSend) {
-                messageText +=
-                    ` [Archivo adjunto: ${fileToSend.name}]`;
+                messageText += ` [Archivo adjunto: ${fileToSend.name}]`;
             }
 
             await processAndSend(messageText, fileToSend);
         });
 
-        // ============================================
-        // PROCESAMIENTO PRINCIPAL DE LA IA (GROQ)
-        // ============================================
-
+        // --- PROCESAMIENTO PRINCIPAL DE LA IA ---
         async function processAndSend(messageText, fileToSend) {
-            // Al comenzar una respuesta nueva, activa el seguimiento.
-            userInteracted = false;
-
             chatHistory.push({
                 role: "user",
                 content: messageText
             });
 
             localStorage.setItem(
-                "paul_chat_history",
+                'paul_chat_history',
                 JSON.stringify(chatHistory)
             );
 
+            userInteracted = false;
             renderStoredHistory();
 
-            const botBubbleContainer =
-                appendMessage("bot", "", null, true);
-
-            const textContainer =
-                botBubbleContainer.querySelector("div");
+            const botBubbleContainer = appendMessage('bot', '', null, true);
+            const textContainer = botBubbleContainer.querySelector('div');
 
             try {
-                const apiKey =
-                    localStorage.getItem("paul_groq_key");
+                const apiKey = localStorage.getItem('paul_groq_key');
 
                 if (!apiKey) {
                     throw new Error(
@@ -1001,8 +855,8 @@ REGLAS DE FORMATO OBLIGATORIAS:
                     "https://api.groq.com/openai/v1/chat/completions";
 
                 const headers = {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${apiKey}`
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
                 };
 
                 const requestBody = {
@@ -1012,7 +866,7 @@ REGLAS DE FORMATO OBLIGATORIAS:
                 };
 
                 const response = await fetch(apiUrl, {
-                    method: "POST",
+                    method: 'POST',
                     headers: headers,
                     body: JSON.stringify(requestBody)
                 });
@@ -1027,7 +881,6 @@ REGLAS DE FORMATO OBLIGATORIAS:
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder("utf-8");
-
                 let fullResponse = "";
 
                 while (true) {
@@ -1035,20 +888,18 @@ REGLAS DE FORMATO OBLIGATORIAS:
 
                     if (done) break;
 
-                    const chunk =
-                        decoder.decode(value, { stream: true });
+                    const chunk = decoder.decode(value, {
+                        stream: true
+                    });
 
                     const lines = chunk.split("\n");
 
                     for (const line of lines) {
                         const trimmed = line.trim();
 
-                        if (!trimmed.startsWith("data: ")) {
-                            continue;
-                        }
+                        if (!trimmed.startsWith("data: ")) continue;
 
-                        const jsonStr =
-                            trimmed.replace("data: ", "");
+                        const jsonStr = trimmed.replace("data: ", "");
 
                         if (jsonStr === "[DONE]") continue;
 
@@ -1064,17 +915,14 @@ REGLAS DE FORMATO OBLIGATORIAS:
                                 textContainer.innerHTML =
                                     marked.parse(fullResponse);
 
-                                // Seguimiento automático del texto.
-                                // Si el usuario se desplaza hacia arriba,
-                                // userInteracted detiene este movimiento.
-                                if (!userInteracted) {
-                                    requestAnimationFrame(() => {
-                                        keepChatAtBottom();
-                                    });
-                                }
+                                // Mantiene el final visible mientras se genera texto.
+                                // Si el usuario desliza hacia arriba, se pausa.
+                                requestAnimationFrame(() => {
+                                    keepChatAtBottom();
+                                });
                             }
                         } catch (e) {
-                            // Ignora fragmentos incompletos del flujo.
+                            // Ignora fragmentos que no sean JSON válido.
                         }
                     }
                 }
@@ -1085,7 +933,7 @@ REGLAS DE FORMATO OBLIGATORIAS:
                 });
 
                 localStorage.setItem(
-                    "paul_chat_history",
+                    'paul_chat_history',
                     JSON.stringify(chatHistory)
                 );
 
