@@ -67,14 +67,15 @@
             border-color: var(--border-color);
         }
 
-        /* --- ESTILOS ESTILO GEMINI (FOTO 2) --- */
+        /* --- ESTILOS ESTILO GEMINI --- */
         .gemini-bubble-ai {
             background-color: transparent !important;
             border: none !important;
             padding: 0 !important;
             color: var(--text-main);
-            font-size: 0.95rem;
-            line-height: 1.6;
+            /* Aumentamos tamaño de letra y espaciado para que se vea como Gemini */
+            font-size: 1.05rem; 
+            line-height: 1.7; 
         }
 
         .gemini-bubble-user {
@@ -84,7 +85,8 @@
             padding: 12px 20px;
             width: fit-content; 
             max-width: 85%;
-            font-size: 0.95rem;
+            font-size: 1.05rem;
+            line-height: 1.5;
         }
 
         .gemini-input-container {
@@ -98,32 +100,72 @@
             border-color: var(--border-color);
         }
 
-        /* Estilos Markdown */
+        /* Estilos Markdown mejorados para imitar a Gemini */
         .markdown-content {
             overflow-wrap: break-word;
             word-break: break-word;
             max-width: 100%;
         }
-        .markdown-content p { margin-bottom: 0.75rem; }
-        .markdown-content p:last-child { margin-bottom: 0; }
-        .markdown-content ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-        .markdown-content ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-        .markdown-content li { margin-bottom: 0.25rem; }
-        .markdown-content strong { font-weight: 600; }
-        .markdown-content code { background: rgba(0,0,0,0.06); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 85%; word-break: break-all; }
+        .markdown-content p { 
+            margin-bottom: 1.2rem; 
+        }
+        .markdown-content p:last-child { 
+            margin-bottom: 0; 
+        }
+        
+        /* Estilos para los títulos (H1, H2, H3) */
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+        
+        /* Estilos para listas */
+        .markdown-content ul { 
+            list-style-type: disc; 
+            margin-left: 1.5rem; 
+            margin-bottom: 1.5rem; 
+        }
+        .markdown-content ol { 
+            list-style-type: decimal; 
+            margin-left: 1.5rem; 
+            margin-bottom: 1.5rem; 
+        }
+        .markdown-content li { 
+            margin-bottom: 0.8rem; 
+            padding-left: 0.25rem;
+        }
+        
+        .markdown-content strong { 
+            font-weight: 600; 
+        }
+        
+        .markdown-content code { 
+            background: rgba(0,0,0,0.06); 
+            padding: 0.2rem 0.4rem; 
+            border-radius: 4px; 
+            font-size: 90%; 
+            word-break: break-all; 
+        }
         
         .markdown-content table {
             width: 100%;
             display: block;
             overflow-x: auto;
             white-space: nowrap;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
             border-collapse: collapse;
         }
         .markdown-content th, .markdown-content td {
             border: 1px solid var(--border-color);
-            padding: 6px 10px;
-            font-size: 0.85rem;
+            padding: 8px 12px;
+            font-size: 0.9rem;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -188,7 +230,7 @@
             </div>
         </div>
 
-        <!-- Derecha: Menú tipo píldora estilo Gemini -->
+        <!-- Derecha: Menú tipo píldora -->
         <div class="flex items-center gap-2 flex-shrink-0">
             <div class="flex items-center border border-[var(--border-color)] rounded-full bg-[var(--bg-main)] overflow-hidden">
                 <button onclick="startNewChat()" class="p-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]" title="Nuevo chat">
@@ -204,7 +246,7 @@
     <!-- Contenedor del Chat -->
     <main id="chat-container" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-8 space-y-10 max-w-3xl w-full mx-auto"></main>
 
-    <!-- Barra Inferior de Entrada (Estilo Gemini) -->
+    <!-- Barra Inferior de Entrada -->
     <footer class="p-3 bg-[var(--bg-main)] flex flex-col items-center transition-colors duration-300 relative flex-shrink-0 pb-6">
         <form id="chat-form" class="gemini-input-container w-full max-w-3xl rounded-[28px] px-2 py-1.5 flex items-center gap-1 shadow-sm">
             
@@ -260,7 +302,6 @@
         function checkKeysState() {
             const groqKey = localStorage.getItem('paul_groq_key');
             if (!groqKey || groqKey.trim() === '') {
-                // Mostrar alerta sutil si no hay llave
                 setTimeout(() => alert("⚠️ Asegúrate de configurar tu API Key de Groq tocando el menú de tres puntos superior derecho."), 1000);
             }
         }
@@ -414,11 +455,9 @@
             
             bubble.appendChild(textNode);
             
-            // En Gemini, los mensajes de IA no tienen fondo, pero el texto va dentro del contenedor
             if (isUser) {
                 bubbleContainer.appendChild(bubble);
             } else {
-                // Para la IA, el texto va directamente y las acciones debajo
                 const aiTextWrapper = document.createElement('div');
                 aiTextWrapper.className = "w-full";
                 aiTextWrapper.appendChild(bubble);
@@ -428,10 +467,9 @@
             // Botones de acción estilo Gemini
             if (!isTyping) {
                 const actionsBar = document.createElement('div');
-                actionsBar.className = "flex items-center gap-1 text-[var(--text-secondary)] mt-2 px-1";
+                actionsBar.className = "flex items-center gap-1 text-[var(--text-secondary)] mt-3 px-1";
 
                 if (isUser && historyIndex !== null) {
-                    // Botón de editar para el usuario (sutil)
                     const editBtn = document.createElement('button');
                     editBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     editBtn.title = "Editar mensaje";
@@ -439,7 +477,6 @@
                     editBtn.onclick = () => editMessage(historyIndex);
                     actionsBar.appendChild(editBtn);
                 } else if (!isUser) {
-                    // Iconos de Gemini para IA
                     // Copiar
                     const copyBtn = document.createElement('button');
                     copyBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
@@ -466,7 +503,7 @@
                     thumbsDown.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715-.212-1.413-.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path></svg>`;
                     actionsBar.appendChild(thumbsDown);
 
-                    // Más opciones (tres puntos)
+                    // Más opciones
                     const moreBtn = document.createElement('button');
                     moreBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     moreBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>`;
@@ -475,7 +512,7 @@
                 bubbleContainer.appendChild(actionsBar);
             }
             
-            // Descargo de responsabilidad estilo Gemini
+            // Descargo de responsabilidad
             if (!isUser && !isTyping) {
                 const disclaimer = document.createElement('div');
                 disclaimer.className = "text-[11px] text-[var(--text-secondary)] mt-1 px-1 opacity-80";
@@ -538,8 +575,19 @@
                     throw new Error("Falta configurar tu API Key de Groq. Toca el menú de tres puntos en la parte superior derecha.");
                 }
 
+                // --- PROMPT MODIFICADO PARA IMITAR EL ESTILO DE GEMINI ---
+                const systemPrompt = `Eres Paul, un asistente personal útil, directo, amigable y con un tono conversacional similar a Gemini.
+                
+                REGLAS DE FORMATO OBLIGATORIAS:
+                1. Para estructurar tus respuestas, SIEMPRE usa títulos de nivel 2 o 3 con formato Markdown (ejemplo: '## 📸 Título de sección' o '### ✍️ Otro título').
+                2. Acompaña cada título con un emoji al inicio que represente la sección.
+                3. Usa viñetas ('* ') para enumerar puntos dentro de las secciones. Evita usar listas numeradas (1. 2. 3.) a menos que sea estrictamente necesario (ej. pasos a seguir).
+                4. Deja mucho espacio entre párrafos para que la lectura sea cómoda y visualmente espaciada, tal como lo hace Gemini.
+                5. Usa **negritas** solo para resaltar palabras clave dentro de las viñetas.
+                6. No uses introducciones robóticas. Sé cálido, colaborativo y directo.`;
+
                 const apiMessages = [
-                    { role: "system", content: "Eres Paul, un asistente personal útil, directo, amigable y bien estructurado." },
+                    { role: "system", content: systemPrompt },
                     ...chatHistory.map(m => ({ role: m.role, content: m.content }))
                 ];
 
