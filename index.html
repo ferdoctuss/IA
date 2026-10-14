@@ -25,8 +25,6 @@
             --border-color: #dadce0;
             --text-main: #1f1f1f;
             --text-secondary: #5f6368;
-            --bubble-ai: #f0f4f9;
-            --bubble-ai-border: #d3e3fd;
             --bubble-user: #0b57d0;
             --bubble-user-text: #ffffff;
             --input-bg: #ffffff;
@@ -39,8 +37,6 @@
                 --border-color: #3c4043;
                 --text-main: #e3e3e3;
                 --text-secondary: #9aa0a6;
-                --bubble-ai: #1e1f20;
-                --bubble-ai-border: #3c4043;
                 --bubble-user: #004a77;
                 --bubble-user-text: #ffffff;
                 --input-bg: #1e1f20;
@@ -70,15 +66,22 @@
             border-color: var(--border-color);
         }
 
+        /* --- NUEVOS ESTILOS ESTILO GEMINI --- */
         .gemini-bubble-ai {
-            background-color: var(--bubble-ai);
-            border: 1px solid var(--bubble-ai-border);
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
             color: var(--text-main);
         }
 
         .gemini-bubble-user {
             background-color: var(--bubble-user);
             color: var(--bubble-user-text);
+            border-radius: 20px;
+            border-bottom-right-radius: 4px;
+            padding: 12px 18px;
+            width: fit-content; 
+            max-width: 100%;
         }
 
         .gemini-input-container {
@@ -368,26 +371,25 @@
             }
         }
 
+        // --- FUNCIÓN MODIFICADA PARA EL ESTILO GEMINI ---
         function appendMessage(sender, text, fileObj = null, isTyping = false, historyIndex = null) {
             const isUser = sender === 'user' || sender === 'system';
             if (sender === 'system') return;
 
             const row = document.createElement('div');
-            row.className = `flex items-start gap-3 w-full max-w-full ${isUser ? 'justify-end' : 'justify-start'}`;
+            // Si es el bot, alineamos a la izquierda sin avatar. Si es usuario, a la derecha.
+            row.className = `flex w-full max-w-full ${isUser ? 'justify-end' : 'justify-start'}`;
             
-            if (!isUser) {
-                const avatar = document.createElement('img');
-                avatar.src = "logo.jpg";
-                avatar.className = "w-8 h-8 rounded-full object-cover flex-shrink-0 shadow border border-[var(--border-color)]";
-                row.appendChild(avatar);
-            }
+            // NOTA: Se eliminó el bloque que añadía el avatar <img> al lado de los mensajes del bot.
 
             const bubbleContainer = document.createElement('div');
-            bubbleContainer.className = `max-w-[85%] sm:max-w-[75%] flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1.5 min-w-0`;
+            // Ajustamos el ancho máximo y los márgenes
+            bubbleContainer.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1.5 min-w-0 max-w-[90%] sm:max-w-[85%]`;
 
             const bubble = document.createElement('div');
-            bubble.className = `rounded-2xl px-5 py-4 text-sm leading-relaxed shadow-sm markdown-content w-full overflow-hidden ${
-                isUser ? 'gemini-bubble-user rounded-br-sm' : 'gemini-bubble-ai rounded-bl-sm'
+            // Usamos las clases CSS específicas para Gemini
+            bubble.className = `text-sm leading-relaxed markdown-content w-full overflow-hidden ${
+                isUser ? 'gemini-bubble-user' : 'gemini-bubble-ai'
             }`;
 
             if (fileObj) {
@@ -416,9 +418,10 @@
             bubble.appendChild(textNode);
             bubbleContainer.appendChild(bubble);
 
+            // Botones de acción (estilo Gemini: flotan justo debajo del texto)
             if (!isTyping) {
                 const actionsBar = document.createElement('div');
-                actionsBar.className = "flex items-center gap-3 text-[var(--text-secondary)] px-1";
+                actionsBar.className = "flex items-center gap-3 text-[var(--text-secondary)] px-1 mt-1";
 
                 if (isUser && historyIndex !== null) {
                     const editBtn = document.createElement('button');
