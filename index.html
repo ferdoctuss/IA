@@ -570,4 +570,217 @@
 
                     const thumbsUp = document.createElement('button');
                     thumbsUp.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
-                    thumbsUp.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0
+                    thumbsUp.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714.211 1.412.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>`;
+                    actionsBar.appendChild(thumbsUp);
+
+                    const thumbsDown = document.createElement('button');
+                    thumbsDown.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    thumbsDown.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715-.212-1.413-.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path></svg>`;
+                    actionsBar.appendChild(thumbsDown);
+
+                    const moreBtn = document.createElement('button');
+                    moreBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    moreBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>`;
+                    actionsBar.appendChild(moreBtn);
+                }
+                bubbleContainer.appendChild(actionsBar);
+            }
+            
+            if (!isUser && !isTyping) {
+                const disclaimer = document.createElement('div');
+                disclaimer.className = "text-[11px] text-[var(--text-secondary)] mt-1 px-1 opacity-80";
+                disclaimer.innerText = currentApiProvider === 'groq' ? "Paul (Groq) es una IA y puede cometer errores." : "Paul (Gemini) es una IA y puede cometer errores.";
+                bubbleContainer.appendChild(disclaimer);
+            }
+            
+            row.appendChild(bubbleContainer);
+            chatContainer.appendChild(row);
+            
+            if (!isTyping) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            return bubble;
+        }
+
+        async function editMessage(index) {
+            const oldMsg = chatHistory[index];
+            if (!oldMsg || oldMsg.role !== 'user') return;
+
+            const newText = prompt("Edita tu mensaje:", oldMsg.content);
+            if (newText === null || newText.trim() === '') return;
+
+            chatHistory = chatHistory.slice(0, index);
+            localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
+            renderStoredHistory();
+
+            await processAndSend(newText.trim(), null);
+        }
+
+        chatForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            const fileToSend = attachedFile;
+
+            if (!text && !fileToSend) return;
+
+            userInput.value = "";
+            attachedFile = null;
+            fileIndicator.classList.add('hidden');
+            fileInput.value = "";
+
+            let messageText = text;
+            if (fileToSend) {
+                messageText += ` [Archivo adjunto: ${fileToSend.name}]`;
+            }
+
+            await processAndSend(messageText, fileToSend);
+        });
+
+        // --- PROCESAMIENTO PRINCIPAL DE LA IA (GROQ O GEMINI) ---
+        async function processAndSend(messageText, fileToSend) {
+            chatHistory.push({ role: "user", content: messageText });
+            localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
+
+            renderStoredHistory();
+
+            const botBubbleContainer = appendMessage('bot', '', null, true);
+            const textContainer = botBubbleContainer.querySelector('div');
+
+            try {
+                const systemPrompt = `Eres Paul, un asistente personal útil, directo, amigable y con un tono conversacional similar a Gemini.
+                
+                REGLAS DE FORMATO OBLIGATORIAS:
+                1. Para estructurar tus respuestas, SIEMPRE usa títulos de nivel 2 o 3 con formato Markdown (ejemplo: '## 📸 Título de sección' o '### ✍️ Otro título').
+                2. Acompaña cada título con un emoji al inicio que represente la sección.
+                3. Usa viñetas ('* ') para enumerar puntos dentro de las secciones. Evita usar listas numeradas (1. 2. 3.) a menos que sea estrictamente necesario (ej. pasos a seguir).
+                4. Deja mucho espacio entre párrafos para que la lectura sea cómoda y visualmente espaciada, tal como lo hace Gemini.
+                5. Usa **negritas** solo para resaltar palabras clave dentro de las viñetas.
+                6. No uses introducciones robóticas. Sé cálido, colaborativo y directo.`;
+
+                let apiUrl, headers, requestBody;
+                
+                // CONFIGURACIÓN SEGÚN EL PROVEEDOR SELECCIONADO
+                if (currentApiProvider === 'groq') {
+                    const apiKey = localStorage.getItem('paul_groq_key');
+                    if (!apiKey) {
+                        throw new Error("Falta configurar tu API Key de Groq. Toca 'Paul API 1' en la cabecera.");
+                    }
+                    apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+                    headers = { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    };
+                    requestBody = {
+                        model: "openai/gpt-oss-120b",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            ...chatHistory.map(m => ({ role: m.role, content: m.content }))
+                        ],
+                        stream: true
+                    };
+                } else {
+                    const apiKey = localStorage.getItem('paul_gemini_key');
+                    if (!apiKey) {
+                        throw new Error("Falta configurar tu API Key de Gemini. Toca 'Paul API 2' en la cabecera.");
+                    }
+                    // --- MODELO ACTUALIZADO Y ENDPOINT CORREGIDO ---
+                    // Usamos 'gemini-1.5-flash-latest' que es más estable.
+                    apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent?key=${apiKey}`;
+                    headers = { 'Content-Type': 'application/json' };
+                    
+                    const geminiContents = chatHistory.map(m => ({
+                        role: m.role === 'assistant' ? 'model' : 'user',
+                        parts: [{ text: m.content }]
+                    }));
+
+                    requestBody = {
+                        contents: geminiContents,
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    };
+                }
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    const errMsg = errData.error?.message || errData.error?.details?.[0]?.reason || "Error en la solicitud";
+                    throw new Error(errMsg);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let fullResponse = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    
+                    // --- CORRECCIÓN DE PARSEO PARA GEMINI ---
+                    // Gemini no usa "data: " prefix en su stream SSE como OpenAI, 
+                    // devuelve un array de objetos JSON. Los parseamos directamente.
+                    if (currentApiProvider === 'gemini') {
+                        try {
+                            // El chunk puede contener múltiples objetos JSON en un array
+                            const parsedChunks = JSON.parse(chunk);
+                            for (const parsed of parsedChunks) {
+                                const content = parsed.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                                if (content) {
+                                    fullResponse += content;
+                                    textContainer.innerHTML = marked.parse(fullResponse);
+                                    
+                                    if (!userInteracted && isScrolledToBottom()) {
+                                        setTimeout(() => {
+                                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                                        }, 10);
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            // Si el chunk no es un JSON válido (raro en Gemini), lo ignoramos
+                        }
+                    } else {
+                        // Formato estándar para Groq/OpenAI
+                        const lines = chunk.split("\n");
+                        for (const line of lines) {
+                            const trimmed = line.trim();
+                            if (trimmed.startsWith("data: ")) {
+                                const jsonStr = trimmed.replace("data: ", "");
+                                if (jsonStr === "[DONE]") continue;
+                                try {
+                                    const parsed = JSON.parse(jsonStr);
+                                    const content = parsed.choices[0]?.delta?.content || "";
+                                    if (content) {
+                                        fullResponse += content;
+                                        textContainer.innerHTML = marked.parse(fullResponse);
+                                        
+                                        if (!userInteracted && isScrolledToBottom()) {
+                                            setTimeout(() => {
+                                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                                            }, 10);
+                                        }
+                                    }
+                                } catch (e) {}
+                            }
+                        }
+                    }
+                }
+
+                chatHistory.push({ role: "assistant", content: fullResponse });
+                localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
+                renderStoredHistory(); 
+
+            } catch (err) {
+                console.error(err);
+                textContainer.innerText = "Error: " + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
