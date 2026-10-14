@@ -75,6 +75,7 @@
             color: var(--text-main);
             font-size: 1.05rem; 
             line-height: 1.7; 
+            width: 100%;
         }
 
         .gemini-bubble-user {
@@ -82,11 +83,12 @@
             color: var(--bubble-user-text);
             border-radius: 24px;
             padding: 14px 20px;
-            width: fit-content; 
-            /* CAMBIO: Reducido de 85% a 80% para que no ocupe toda la pantalla */
-            max-width: 80%; 
+            /* FORZAR ANCHO AJUSTABLE AL TEXTO */
+            width: fit-content !important; 
+            max-width: 85% !important; 
             font-size: 1.05rem;
             line-height: 1.5;
+            word-wrap: break-word;
         }
 
         .gemini-input-container {
@@ -268,11 +270,25 @@
         let chatHistory = JSON.parse(localStorage.getItem('paul_chat_history')) || [];
         let sessions = JSON.parse(localStorage.getItem('paul_sessions')) || [];
 
+        // --- VARIABLES PARA EL CONTROL DEL SCROLL ---
+        let userInteracted = false;
+        let userInteractionTimeout;
+
+        // Detectar si el usuario toca la pantalla para pausar el auto-scroll
+        chatContainer.addEventListener('touchstart', () => { 
+            userInteracted = true; 
+            clearTimeout(userInteractionTimeout);
+        });
+        
+        chatContainer.addEventListener('touchend', () => { 
+            // Dar un margen de 1 segundo después de que el usuario deje de tocar antes de reanudar
+            userInteractionTimeout = setTimeout(() => { userInteracted = false; }, 1000); 
+        });
+
         checkKeysState();
         renderStoredHistory();
         updateHistoryDrawerList();
 
-        // --- FUNCIÓN PARA DETECTAR SI EL USUARIO ESTÁ VIENDO LA PARTE INFERIOR ---
         function isScrolledToBottom() {
             // Retorna true si el usuario está a menos de 50px del fondo
             return chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 50;
@@ -403,7 +419,9 @@
             row.className = `flex w-full max-w-full ${isUser ? 'justify-end' : 'justify-start'}`;
             
             const bubbleContainer = document.createElement('div');
-            bubbleContainer.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full`;
+            // SOLUCIÓN: Quitamos 'w-full' para que el contenedor no se estire. 
+            // Usamos 'w-fit' para el usuario y 'w-full' para el bot (para que ocupe su espacio).
+            bubbleContainer.className = `flex flex-col ${isUser ? 'items-end w-fit' : 'items-start w-full'}`;
 
             const bubble = document.createElement('div');
             bubble.className = `markdown-content ${isUser ? 'gemini-bubble-user' : 'gemini-bubble-ai'}`;
@@ -495,8 +513,10 @@
             row.appendChild(bubbleContainer);
             chatContainer.appendChild(row);
             
-            // Auto-scroll inicial al agregar un mensaje
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            // Auto-scroll inicial solo si no es el bot escribiendo (para no interrumpir la lectura si el usuario acaba de enviar)
+            if (!isTyping) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
             
             return bubble;
         }
@@ -608,9 +628,13 @@
                                     fullResponse += content;
                                     textContainer.innerHTML = marked.parse(fullResponse);
                                     
-                                    // --- CAMBIO: Solo hacer scroll automático si el usuario está al final ---
-                                    if (isScrolledToBottom()) {
-                                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                                    // --- SCROLL INTELIGENTE ---
+                                    // Solo baja si el usuario no está tocando la pantalla y está cerca del final
+                                    if (!userInteracted && isScrolledToBottom()) {
+                                        // Usamos un pequeño timeout para permitir que el DOM se actualice antes de medir el scrollHeight
+                                        setTimeout(() => {
+                                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                                        }, 10);
                                     }
                                 }
                             } catch (e) {}
@@ -620,7 +644,11 @@
 
                 chatHistory.push({ role: "assistant", content: fullResponse });
                 localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
-                renderStoredHistory();
+                
+                // --- SOLUCIÓN AL SALTO FINAL ---
+                // Ya no llamamos a renderStoredHistory() aquí. 
+                // El DOM ya tiene el texto final renderizado por el bucle while.
+                // Al no re-renderizar, el scroll no salta y la experiencia es fluida.
 
             } catch (err) {
                 console.error(err);
