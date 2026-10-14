@@ -83,12 +83,14 @@
             color: var(--bubble-user-text);
             border-radius: 24px;
             padding: 14px 20px;
-            /* FORZAR ANCHO AJUSTABLE AL TEXTO */
-            width: fit-content !important; 
-            max-width: 85% !important; 
+            /* Ajustes para que la burbuja se adapte al texto */
+            width: fit-content; 
+            max-width: 85%; 
             font-size: 1.05rem;
             line-height: 1.5;
-            word-wrap: break-word;
+            /* Evita que se corten palabras cortas por la mitad */
+            word-break: normal; 
+            overflow-wrap: break-word; 
         }
 
         .gemini-input-container {
@@ -105,7 +107,6 @@
         /* Estilos Markdown */
         .markdown-content {
             overflow-wrap: break-word;
-            word-break: break-word;
             max-width: 100%;
         }
         .markdown-content p { margin-bottom: 1.2rem; }
@@ -290,7 +291,6 @@
         updateHistoryDrawerList();
 
         function isScrolledToBottom() {
-            // Retorna true si el usuario está a menos de 50px del fondo
             return chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 50;
         }
 
@@ -419,8 +419,7 @@
             row.className = `flex w-full max-w-full ${isUser ? 'justify-end' : 'justify-start'}`;
             
             const bubbleContainer = document.createElement('div');
-            // SOLUCIÓN: Quitamos 'w-full' para que el contenedor no se estire. 
-            // Usamos 'w-fit' para el usuario y 'w-full' para el bot (para que ocupe su espacio).
+            // SOLUCIÓN: Quitamos 'w-full' en el contenedor del usuario para que se ajuste al contenido
             bubbleContainer.className = `flex flex-col ${isUser ? 'items-end w-fit' : 'items-start w-full'}`;
 
             const bubble = document.createElement('div');
@@ -441,7 +440,8 @@
             }
 
             const textNode = document.createElement('div');
-            textNode.className = "w-full overflow-x-auto";
+            // SOLUCIÓN: Quitamos 'w-full' aquí también para que el texto no fuerce el ancho
+            textNode.className = "overflow-x-auto";
             
             if (isTyping) {
                 textNode.innerHTML = `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
@@ -513,7 +513,6 @@
             row.appendChild(bubbleContainer);
             chatContainer.appendChild(row);
             
-            // Auto-scroll inicial solo si no es el bot escribiendo (para no interrumpir la lectura si el usuario acaba de enviar)
             if (!isTyping) {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
@@ -629,9 +628,7 @@
                                     textContainer.innerHTML = marked.parse(fullResponse);
                                     
                                     // --- SCROLL INTELIGENTE ---
-                                    // Solo baja si el usuario no está tocando la pantalla y está cerca del final
                                     if (!userInteracted && isScrolledToBottom()) {
-                                        // Usamos un pequeño timeout para permitir que el DOM se actualice antes de medir el scrollHeight
                                         setTimeout(() => {
                                             chatContainer.scrollTop = chatContainer.scrollHeight;
                                         }, 10);
@@ -645,10 +642,7 @@
                 chatHistory.push({ role: "assistant", content: fullResponse });
                 localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
                 
-                // --- SOLUCIÓN AL SALTO FINAL ---
-                // Ya no llamamos a renderStoredHistory() aquí. 
-                // El DOM ya tiene el texto final renderizado por el bucle while.
-                // Al no re-renderizar, el scroll no salta y la experiencia es fluida.
+                // Se eliminó renderStoredHistory() aquí para evitar el salto brusco al final.
 
             } catch (err) {
                 console.error(err);
