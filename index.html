@@ -684,9 +684,8 @@
                     if (!apiKey) {
                         throw new Error("Falta configurar tu API Key de Gemini. Toca 'Paul API 2' en la cabecera.");
                     }
-                    // --- MODELO ACTUALIZADO Y ENDPOINT CORREGIDO ---
-                    // Usamos 'gemini-1.5-flash-latest' que es más estable.
-                    apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent?key=${apiKey}`;
+                    // --- MODELO ACTUALIZADO ---
+                    apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${apiKey}`;
                     headers = { 'Content-Type': 'application/json' };
                     
                     const geminiContents = chatHistory.map(m => ({
@@ -723,8 +722,6 @@
                     const chunk = decoder.decode(value, { stream: true });
                     
                     // --- CORRECCIÓN DE PARSEO PARA GEMINI ---
-                    // Gemini no usa "data: " prefix en su stream SSE como OpenAI, 
-                    // devuelve un array de objetos JSON. Los parseamos directamente.
                     if (currentApiProvider === 'gemini') {
                         try {
                             // El chunk puede contener múltiples objetos JSON en un array
