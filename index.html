@@ -79,13 +79,13 @@
             background-color: var(--bubble-user);
             color: var(--bubble-user-text);
             border-radius: 24px;
-            padding: 14px 20px;
+            padding: 12px 18px;
             width: fit-content;
-            max-width: 85%;
+            max-width: 100%;
             font-size: 1.05rem;
             line-height: 1.5;
-            word-break: normal;
-            overflow-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
         }
 
         .gemini-input-container {
@@ -606,8 +606,9 @@
 
             const bubbleContainer = document.createElement('div');
 
+            // AQUÍ ESTÁ LA CORRECCIÓN: max-w-[85%] en lugar de solo w-fit
             bubbleContainer.className =
-                `flex flex-col ${isUser ? 'items-end w-fit' : 'items-start w-full'}`;
+                `flex flex-col ${isUser ? 'items-end max-w-[85%]' : 'items-start w-full'}`;
 
             const bubble = document.createElement('div');
 
