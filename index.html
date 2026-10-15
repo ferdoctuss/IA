@@ -299,11 +299,21 @@
 
             <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
                 <h2 class="font-medium text-base">Historial de Chats</h2>
-                <button onclick="toggleHistoryDrawer()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+                
+                <div class="flex items-center gap-1">
+                    <!-- Botón para Limpiar Historial y Caché -->
+                    <button onclick="clearHistoryAndCache()" class="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition" title="Borrar todo y limpiar caché">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                    <!-- Botón para cerrar panel -->
+                    <button onclick="toggleHistoryDrawer()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <button onclick="startNewChat(true)" class="mt-4 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium text-sm transition shadow flex items-center justify-center gap-2">
@@ -535,9 +545,25 @@
             }
         });
 
+        // --- FUNCIONES DEL HISTORIAL Y CACHÉ ---
         function toggleHistoryDrawer() {
             historyDrawer.classList.toggle('hidden');
             updateHistoryDrawerList();
+        }
+
+        function clearHistoryAndCache() {
+            if (confirm("⚠️ ¿Estás seguro de que deseas borrar TODO el historial y limpiar la memoria caché? Esto no se puede deshacer.")) {
+                // Elimina los datos guardados
+                localStorage.removeItem('paul_chat_history');
+                localStorage.removeItem('paul_sessions');
+                
+                chatHistory = [];
+                sessions = [];
+                userInteracted = false;
+                
+                // Recarga la página para liberar la memoria RAM y limpiar el DOM
+                window.location.reload();
+            }
         }
 
         function updateHistoryDrawerList() {
@@ -617,7 +643,6 @@
             let sourceName = null;
             let sourceUrl = null;
 
-            // Extraer Etiquetas YT y FUENTE
             const ytMatch = rawText.match(/\[YT:\s*(.+?)\]/i);
             const sourceMatch = rawText.match(/\[FUENTE:\s*(.+?)(?:\s*\Vert{}\s*(.+?))?\]/i);
             
@@ -627,7 +652,6 @@
                 if (sourceMatch[2]) sourceUrl = sourceMatch[2].trim();
             }
 
-            // Limpiarlas del texto a renderizar
             let cleanText = rawText
                 .replace(/\[YT:\s*(.+?)\]/gi, '')
                 .replace(/\[FUENTE:\s*(.+?)(?:\s*\Vert{}\s*(.+?))?\]/gi, '')
@@ -635,7 +659,6 @@
 
             let html = marked.parse(cleanText);
             
-            // Reemplazo de links directos de YT por iframe. (Ignorado por html2pdf)
             const ytUrlRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
             html = html.replace(ytUrlRegex, (match, videoId) => {
                 return `
@@ -644,7 +667,6 @@
                 </div>`;
             });
 
-            // Inyectar tarjeta de Fuente si existe (Ignorado por html2pdf)
             if (sourceName) {
                 const href = sourceUrl && sourceUrl.startsWith('http') ? sourceUrl : `https://www.google.com/search?q=${encodeURIComponent(sourceName)}`;
                 html += `
@@ -661,7 +683,6 @@
                 </a>`;
             }
 
-            // Inyectar tarjeta de YouTube si existe (Ignorado por html2pdf)
             if (ytQuery) {
                 const searchUrl = `https://m.youtube.com/results?search_query=${encodeURIComponent(ytQuery)}`;
                 html += `
@@ -681,7 +702,6 @@
             return html;
         }
 
-        // Función para exportar a PDF (Usa html2pdf)
         function exportBubbleToPDF(bubbleElement) {
             const opt = {
                 margin:       10,
@@ -690,11 +710,9 @@
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-            // Las tarjetas desaparecerán automáticamente en el PDF gracias a data-html2canvas-ignore="true"
             html2pdf().set(opt).from(bubbleElement).save();
         }
 
-        // Función para leer el texto en voz alta
         function playAudio(text, btnElement) {
             const synth = window.speechSynthesis;
             if (synth.speaking) {
@@ -715,7 +733,7 @@
             iconSvg.classList.add('text-blue-500');
             iconSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>`;
 
-            // Elimina etiquetas yt/fuente, caracteres markdown y todos los Emojis para una lectura limpia
+            // Elimina etiquetas yt/fuente, caracteres markdown y todos los Emojis
             const cleanText = text
                 .replace(/\[YT:\s*(.+?)\]/gi, '')
                 .replace(/\[FUENTE:\s*(.+?)(?:\s*\Vert{}\s*(.+?))?\]/gi, '')
@@ -782,7 +800,6 @@
 
             if (!isTyping) {
                 const actionsBar = document.createElement('div');
-                // IMPORTANTE: data-html2canvas-ignore para que los botones tampoco salgan en el PDF
                 actionsBar.setAttribute("data-html2canvas-ignore", "true");
                 actionsBar.className = `flex items-center gap-1 text-[var(--text-secondary)] ${isUser ? 'mt-1' : 'mt-2'} px-1`;
 
@@ -796,7 +813,6 @@
 
                 } else if (!isUser) {
                     
-                    // BOTÓN 1: COPIAR
                     const copyBtn = document.createElement('button');
                     copyBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     copyBtn.title = "Copiar";
@@ -813,7 +829,6 @@
                     };
                     actionsBar.appendChild(copyBtn);
 
-                    // BOTÓN 2: REFRESCAR (Regenerar Respuesta)
                     const refreshBtn = document.createElement('button');
                     refreshBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     refreshBtn.title = "Regenerar respuesta";
@@ -830,7 +845,6 @@
                     };
                     actionsBar.appendChild(refreshBtn);
 
-                    // BOTÓN 3: AUDIO (Leer en voz alta)
                     const audioBtn = document.createElement('button');
                     audioBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     audioBtn.title = "Leer respuesta";
@@ -839,7 +853,6 @@
                     audioBtn.onclick = () => playAudio(text, audioBtn);
                     actionsBar.appendChild(audioBtn);
 
-                    // BOTÓN 4: MENÚ DROPDOWN (PDF, Extender, Acortar)
                     const menuContainer = document.createElement('div');
                     menuContainer.className = "relative inline-block";
 
