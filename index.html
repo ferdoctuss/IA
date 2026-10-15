@@ -13,7 +13,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Librería añadida para exportar las burbujas a PDF -->
+    <!-- Librería para exportar las burbujas a PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <meta name="theme-color" content="#ffffff" id="theme-color-meta">
@@ -229,13 +229,12 @@
             font-size: 0.9rem;
         }
 
-        /* Tarjetas de enlaces (YouTube y Fuentes) */
+        /* Estilo base para las tarjetas dinámicas */
         .yt-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 12px 16px;
-            margin-top: 14px;
             display: flex;
             align-items: center;
             gap: 14px;
@@ -252,18 +251,11 @@
             width: 48px;
             height: 48px;
             border-radius: 12px;
-            background: #ff0000;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
             color: white;
-            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.25);
-        }
-
-        .source-icon-box {
-            background: #2563eb; /* Azul para la fuente */
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -314,7 +306,6 @@
                 </button>
             </div>
 
-            <!-- Botón de nuevo chat en el Drawer -->
             <button onclick="startNewChat(true)" class="mt-4 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium text-sm transition shadow flex items-center justify-center gap-2">
                 <span>+ Nuevo chat</span>
             </button>
@@ -335,7 +326,6 @@
                 </svg>
             </button>
 
-            <!-- Logo añadido junto al nombre -->
             <div class="flex items-center gap-1.5 py-1.5 px-2">
                 <img src="logo.jpg" alt="Logo" class="w-6 h-6 rounded-full object-cover shadow-sm border border-[var(--border-color)]">
                 <span class="text-[17px] font-medium tracking-wide text-[var(--text-main)]">Paul</span>
@@ -346,7 +336,6 @@
         <div class="flex items-center gap-2 flex-shrink-0">
             <div class="flex items-center border border-[var(--border-color)] rounded-full bg-[var(--bg-main)] overflow-hidden">
 
-                <!-- Botón de nuevo chat en Cabecera (Limpia sin abrir panel) -->
                 <button onclick="startNewChat(false)" class="p-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]" title="Nuevo chat">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path>
@@ -620,29 +609,33 @@
             }
         }
 
-        // --- FORMATEADOR CON YOUTUBE Y FUENTES ---
-        function formatMarkdownWithYouTube(rawText) {
+        // --- FORMATEADOR CON TARJETAS (YOUTUBE Y FUENTES) ---
+        function formatMarkdownWithCards(rawText) {
             if (!rawText) return '';
             
             let ytQuery = null;
+            let sourceName = null;
             let sourceUrl = null;
 
-            // Extraer etiquetas de YouTube y Fuente
+            // Extraer Etiquetas YT y FUENTE
             const ytMatch = rawText.match(/\[YT:\s*(.+?)\]/i);
-            const sourceMatch = rawText.match(/\/i);
+            const sourceMatch = rawText.match(/\[FUENTE:\s*(.+?)(?:\s*\Vert{}\s*(.+?))?\]/i);
+            
+            if (ytMatch && ytMatch[1]) ytQuery = ytMatch[1].trim();
+            if (sourceMatch && sourceMatch[1]) {
+                sourceName = sourceMatch[1].trim();
+                if (sourceMatch[2]) sourceUrl = sourceMatch[2].trim();
+            }
 
-            // Limpiar el texto principal de ambas etiquetas
+            // Limpiarlas del texto a renderizar
             let cleanText = rawText
                 .replace(/\[YT:\s*(.+?)\]/gi, '')
-                .replace(/\[SOURCE:\s*(.+?)\]/gi, '')
+                .replace(/\[FUENTE:\s*(.+?)(?:\s*\Vert{}\s*(.+?))?\]/gi, '')
                 .trim();
 
-            if (ytMatch && ytMatch[1]) ytQuery = ytMatch[1].trim();
-            if (sourceMatch && sourceMatch[1]) sourceUrl = sourceMatch[1].trim();
-
             let html = marked.parse(cleanText);
-
-            // Reemplazo de links directos por iframe de video (Ocultos en PDF)
+            
+            // Reemplazo de links directos de YT por iframe. (Ignorado por html2pdf)
             const ytUrlRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
             html = html.replace(ytUrlRegex, (match, videoId) => {
                 return `
@@ -651,12 +644,29 @@
                 </div>`;
             });
 
-            // Tarjeta de YouTube (Oculta en PDF)
+            // Inyectar tarjeta de Fuente si existe (Ignorado por html2pdf)
+            if (sourceName) {
+                const href = sourceUrl && sourceUrl.startsWith('http') ? sourceUrl : `https://www.google.com/search?q=${encodeURIComponent(sourceName)}`;
+                html += `
+                <a href="${href}" target="_blank" rel="noopener noreferrer" data-html2canvas-ignore="true" class="yt-card mt-4">
+                    <div class="yt-icon-box" style="background-color: #2563eb; box-shadow: 0 2px 8px rgba(37,99,235,0.3);">
+                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Fuente Sugerida</div>
+                        <div class="text-sm font-medium truncate mt-0.5">${sourceName}</div>
+                        <div class="text-xs text-[var(--text-secondary)] mt-0.5">Toca para visitar o buscar</div>
+                    </div>
+                    <svg class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>`;
+            }
+
+            // Inyectar tarjeta de YouTube si existe (Ignorado por html2pdf)
             if (ytQuery) {
                 const searchUrl = `https://m.youtube.com/results?search_query=${encodeURIComponent(ytQuery)}`;
                 html += `
-                <a href="${searchUrl}" target="_blank" rel="noopener noreferrer" class="yt-card" data-html2canvas-ignore="true">
-                    <div class="yt-icon-box">
+                <a href="${searchUrl}" target="_blank" rel="noopener noreferrer" data-html2canvas-ignore="true" class="yt-card ${sourceName ? 'mt-2' : 'mt-4'}">
+                    <div class="yt-icon-box" style="background-color: #ff0000; box-shadow: 0 2px 8px rgba(255,0,0,0.25);">
                         <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                     </div>
                     <div class="flex-1 min-w-0">
@@ -668,27 +678,10 @@
                 </a>`;
             }
 
-            // Tarjeta de Fuente Principal (Oculta en PDF)
-            if (sourceUrl) {
-                let href = sourceUrl.startsWith('http') ? sourceUrl : `https://${sourceUrl}`;
-                html += `
-                <a href="${href}" target="_blank" rel="noopener noreferrer" class="yt-card" data-html2canvas-ignore="true">
-                    <div class="yt-icon-box source-icon-box">
-                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Fuente recomendada</div>
-                        <div class="text-sm font-medium truncate mt-0.5">${sourceUrl.replace(/^https?:\/\//, '')}</div>
-                        <div class="text-xs text-[var(--text-secondary)] mt-0.5">Toca para visitar el sitio web</div>
-                    </div>
-                    <svg class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                </a>`;
-            }
-
             return html;
         }
 
-        // Función para exportar a PDF (Ignora botones y tarjetas con data-html2canvas-ignore)
+        // Función para exportar a PDF (Usa html2pdf)
         function exportBubbleToPDF(bubbleElement) {
             const opt = {
                 margin:       10,
@@ -697,10 +690,11 @@
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
+            // Las tarjetas desaparecerán automáticamente en el PDF gracias a data-html2canvas-ignore="true"
             html2pdf().set(opt).from(bubbleElement).save();
         }
 
-        // Función para leer el texto en voz alta (SIN EMOJIS, YT, NI FUENTES)
+        // Función para leer el texto en voz alta
         function playAudio(text, btnElement) {
             const synth = window.speechSynthesis;
             if (synth.speaking) {
@@ -721,13 +715,12 @@
             iconSvg.classList.add('text-blue-500');
             iconSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>`;
 
-            // Se filtra formato, tarjetas ocultas y CUALQUIER EMOJI Unicode antes de leer
+            // Elimina etiquetas yt/fuente, caracteres markdown y todos los Emojis para una lectura limpia
             const cleanText = text
                 .replace(/\[YT:\s*(.+?)\]/gi, '')
-                .replace(/\/gi, '')
-                .replace(/[*#_`~]/g, '')
-                .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1FA00}-\u{1FAFF}\u{1F000}-\u{1F02F}]/gu, '')
-                .replace(/\uFE0F/g, '');
+                .replace(/\[FUENTE:\s*(.+?)(?:\s*\Vert{}\s*(.+?))?\]/gi, '')
+                .replace(/[*#_]/g, '')
+                .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1FA00}-\u{1FAFF}\u{2300}-\u{23FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '');
 
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'es-ES';
@@ -773,7 +766,7 @@
             if (isTyping) {
                 textNode.innerHTML = `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
             } else {
-                textNode.innerHTML = isUser ? marked.parse(text) : formatMarkdownWithYouTube(text);
+                textNode.innerHTML = isUser ? marked.parse(text) : formatMarkdownWithCards(text);
             }
 
             bubble.appendChild(textNode);
@@ -789,8 +782,8 @@
 
             if (!isTyping) {
                 const actionsBar = document.createElement('div');
-                // Agregado el data-html2canvas-ignore para que la botonera no salga en el PDF
-                actionsBar.setAttribute('data-html2canvas-ignore', 'true');
+                // IMPORTANTE: data-html2canvas-ignore para que los botones tampoco salgan en el PDF
+                actionsBar.setAttribute("data-html2canvas-ignore", "true");
                 actionsBar.className = `flex items-center gap-1 text-[var(--text-secondary)] ${isUser ? 'mt-1' : 'mt-2'} px-1`;
 
                 if (isUser && historyIndex !== null) {
@@ -803,14 +796,15 @@
 
                 } else if (!isUser) {
                     
+                    // BOTÓN 1: COPIAR
                     const copyBtn = document.createElement('button');
                     copyBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     copyBtn.title = "Copiar";
                     copyBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
                     copyBtn.onclick = async () => {
                         try {
-                            const clipText = text.replace(/\[YT:\s*(.+?)\]/gi, '').replace(/\/gi, '').trim();
-                            await navigator.clipboard.writeText(clipText);
+                            const raw = text.replace(/\[YT:\s*(.+?)\]/gi, '').replace(/\[FUENTE:\s*(.+?)(?:\s*\Vert{}\s*(.+?))?\]/gi, '').trim();
+                            await navigator.clipboard.writeText(raw);
                             copyBtn.innerHTML = `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>`;
                             setTimeout(() => {
                                 copyBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
@@ -819,6 +813,7 @@
                     };
                     actionsBar.appendChild(copyBtn);
 
+                    // BOTÓN 2: REFRESCAR (Regenerar Respuesta)
                     const refreshBtn = document.createElement('button');
                     refreshBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     refreshBtn.title = "Regenerar respuesta";
@@ -835,6 +830,7 @@
                     };
                     actionsBar.appendChild(refreshBtn);
 
+                    // BOTÓN 3: AUDIO (Leer en voz alta)
                     const audioBtn = document.createElement('button');
                     audioBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     audioBtn.title = "Leer respuesta";
@@ -843,6 +839,7 @@
                     audioBtn.onclick = () => playAudio(text, audioBtn);
                     actionsBar.appendChild(audioBtn);
 
+                    // BOTÓN 4: MENÚ DROPDOWN (PDF, Extender, Acortar)
                     const menuContainer = document.createElement('div');
                     menuContainer.className = "relative inline-block";
 
@@ -864,7 +861,7 @@
                     pdfBtn.onclick = (e) => {
                         e.stopPropagation();
                         dropdown.classList.add('hidden');
-                        exportBubbleToPDF(bubbleContainer); // Exportamos el contenedor completo pero las tarjetas y botones serán ignorados
+                        exportBubbleToPDF(bubbleContainer);
                     };
 
                     extBtn.onclick = (e) => {
@@ -897,7 +894,7 @@
 
             if (!isUser && !isTyping) {
                 const disclaimer = document.createElement('div');
-                disclaimer.setAttribute('data-html2canvas-ignore', 'true');
+                disclaimer.setAttribute("data-html2canvas-ignore", "true");
                 disclaimer.className = "text-[11px] text-[var(--text-secondary)] mt-1 px-1 opacity-80";
                 disclaimer.innerText = "Paul es una IA y puede cometer errores.";
                 bubbleContainer.appendChild(disclaimer);
@@ -962,8 +959,8 @@ REGLAS DE FORMATO OBLIGATORIAS:
 4. Deja espacio limpio entre párrafos para que la lectura sea cómoda.
 5. Usa **negritas** solo para resaltar palabras clave dentro de las viñetas.
 6. No uses introducciones robóticas. Sé cálido, colaborativo y directo.
-7. VIDEO DE YOUTUBE OBLIGATORIO EN TEMAS INFORMATIVOS: Cuando el usuario pregunte sobre historia, ciencia, tutoriales, tecnología, cultura o cualquier tema explicativo, incluye SIEMPRE al final de tu respuesta una línea con el formato exacto: [YT: título específico del video a buscar en YouTube]. Ejemplo: [YT: Cómo fue la conquista del Imperio Inca documental]
-8. FUENTE PRINCIPAL (OPCIONAL): Si utilizas una fuente específica o un sitio web de referencia importante, inclúyelo al final con el formato:. Solo si aplica.`;
+7. VIDEO DE YOUTUBE OBLIGATORIO EN TEMAS INFORMATIVOS: Cuando el usuario pregunte sobre historia, ciencia, tutoriales, tecnología, cultura o cualquier tema explicativo, incluye SIEMPRE al final de tu respuesta una línea con el formato exacto: [YT: título específico del video a buscar en YouTube].
+8. FUENTE DE INFORMACIÓN (Opcional): Si tu respuesta se basa en una fuente específica muy confiable o quieres citar de dónde proviene la información clave, incluye al final una línea con el formato exacto: [FUENTE: Nombre del sitio o autor | url_opcional]. Ejemplo: [FUENTE: National Geographic | https://www.nationalgeographic.com] o simplemente [FUENTE: Wikipedia].`;
 
                 const apiMessages = [
                     { role: "system", content: systemPrompt },
@@ -1015,7 +1012,7 @@ REGLAS DE FORMATO OBLIGATORIAS:
                             const content = parsed.choices[0]?.delta?.content || "";
                             if (content) {
                                 fullResponse += content;
-                                textContainer.innerHTML = formatMarkdownWithYouTube(fullResponse);
+                                textContainer.innerHTML = formatMarkdownWithCards(fullResponse);
                                 requestAnimationFrame(() => keepChatAtBottom());
                             }
                         } catch (e) { }
