@@ -553,7 +553,6 @@
 
         function clearHistoryAndCache() {
             if (confirm("⚠️ ¿Estás seguro de que deseas borrar TODO el historial y limpiar la memoria caché? Esto no se puede deshacer.")) {
-                // Elimina los datos guardados
                 localStorage.removeItem('paul_chat_history');
                 localStorage.removeItem('paul_sessions');
                 
@@ -561,7 +560,6 @@
                 sessions = [];
                 userInteracted = false;
                 
-                // Recarga la página para liberar la memoria RAM y limpiar el DOM
                 window.location.reload();
             }
         }
@@ -713,21 +711,31 @@
             html2pdf().set(opt).from(bubbleElement).save();
         }
 
+        // --- CORRECCIÓN INTEGRADA PARA EL BOTÓN DE AUDIO (NO REINICIA, SOLO DETIENE) ---
         function playAudio(text, btnElement) {
             const synth = window.speechSynthesis;
-            if (synth.speaking) {
+            
+            // 1. Guardamos el estado ANTES de resetear los botones
+            const wasPlaying = btnElement.dataset.playing === "true";
+
+            // Si hay algo sonando o en cola, lo cancelamos
+            if (synth.speaking || synth.pending) {
                 synth.cancel();
+                
+                // Reseteamos visualmente todos los iconos
                 document.querySelectorAll('.audio-btn-icon').forEach(icon => {
                     icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
                     icon.classList.remove('text-blue-500');
                     icon.parentElement.dataset.playing = "false";
                 });
-                if (btnElement.dataset.playing === "true") {
-                    btnElement.dataset.playing = "false";
+
+                // 2. Si el botón que tocaste ERA el que estaba sonando, salimos de la función sin volver a hablar
+                if (wasPlaying) {
                     return;
                 }
             }
 
+            // Si llegamos aquí, iniciamos la lectura nueva
             btnElement.dataset.playing = "true";
             const iconSvg = btnElement.querySelector('.audio-btn-icon');
             iconSvg.classList.add('text-blue-500');
