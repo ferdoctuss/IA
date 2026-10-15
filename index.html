@@ -13,6 +13,8 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Librería añadida para exportar las burbujas a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <meta name="theme-color" content="#ffffff" id="theme-color-meta">
 
@@ -77,7 +79,6 @@
             width: 100%;
         }
 
-        /* Burbuja del usuario limitada al 85% */
         .gemini-bubble-user {
             background-color: var(--bubble-user);
             color: var(--bubble-user-text);
@@ -96,7 +97,6 @@
             margin-bottom: 0 !important;
         }
 
-        /* --- CAJA DE ENTRADA DINÁMICA ESTILO GEMINI --- */
         .gemini-input-container {
             background-color: var(--input-bg);
             border: 1px solid var(--input-border);
@@ -114,7 +114,6 @@
             border-color: var(--border-color);
         }
 
-        /* Estado expandido (cuando el prompt tiene 2 o más líneas, igual a Foto 1) */
         .gemini-input-container.multiline {
             flex-wrap: wrap;
             border-radius: 24px;
@@ -230,7 +229,6 @@
             font-size: 0.9rem;
         }
 
-        /* Tarjeta de Video de YouTube estilo Gemini */
         .yt-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -269,12 +267,8 @@
         }
 
         @keyframes bounce-custom {
-            0%, 80%, 100% {
-                transform: scale(0);
-            }
-            40% {
-                transform: scale(1.0);
-            }
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
         }
 
         .typing-dot {
@@ -287,22 +281,11 @@
             margin-right: 2px;
         }
 
-        .typing-dot:nth-child(1) {
-            animation-delay: -0.32s;
-        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
 
-        .typing-dot:nth-child(2) {
-            animation-delay: -0.16s;
-        }
-
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb {
             background: var(--border-color);
             border-radius: 4px;
@@ -318,7 +301,6 @@
 
             <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
                 <h2 class="font-medium text-base">Historial de Chats</h2>
-
                 <button onclick="toggleHistoryDrawer()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -326,7 +308,8 @@
                 </button>
             </div>
 
-            <button onclick="startNewChat()" class="mt-4 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium text-sm transition shadow flex items-center justify-center gap-2">
+            <!-- Botón de nuevo chat en el Drawer (con true para cerrar el panel) -->
+            <button onclick="startNewChat(true)" class="mt-4 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium text-sm transition shadow flex items-center justify-center gap-2">
                 <span>+ Nuevo chat</span>
             </button>
 
@@ -346,7 +329,9 @@
                 </svg>
             </button>
 
-            <div class="flex items-center gap-1 py-1.5 px-3">
+            <!-- Logo añadido junto al nombre -->
+            <div class="flex items-center gap-1.5 py-1.5 px-2">
+                <img src="logo.jpg" alt="Logo" class="w-6 h-6 rounded-full object-cover shadow-sm border border-[var(--border-color)]">
                 <span class="text-[17px] font-medium tracking-wide text-[var(--text-main)]">Paul</span>
                 <span class="text-[17px] text-[var(--text-secondary)] font-normal">Flash</span>
             </div>
@@ -355,7 +340,8 @@
         <div class="flex items-center gap-2 flex-shrink-0">
             <div class="flex items-center border border-[var(--border-color)] rounded-full bg-[var(--bg-main)] overflow-hidden">
 
-                <button onclick="startNewChat()" class="p-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]" title="Nuevo chat">
+                <!-- Botón de nuevo chat en Cabecera (con false para NO abrir el panel y limpiar de inmediato) -->
+                <button onclick="startNewChat(false)" class="p-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center text-[var(--text-main)]" title="Nuevo chat">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path>
                     </svg>
@@ -374,53 +360,29 @@
     <!-- Contenedor del chat -->
     <main id="chat-container" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 space-y-5 max-w-3xl w-full mx-auto"></main>
 
-    <!-- Barra de entrada auto-expandible -->
+    <!-- Barra de entrada -->
     <footer class="p-3 bg-[var(--bg-main)] flex flex-col items-center transition-colors duration-300 relative flex-shrink-0 pb-6">
 
         <form id="chat-form" class="gemini-input-container w-full max-w-3xl shadow-sm">
 
             <input type="file" id="file-input" class="hidden" accept="image/*,.pdf,.txt,.doc,.docx">
 
-            <!-- Botón + (Adjuntar) -->
-            <button
-                type="button"
-                id="attach-btn"
-                onclick="document.getElementById('file-input').click()"
-                class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0"
-                title="Adjuntar archivo"
-            >
+            <button type="button" id="attach-btn" onclick="document.getElementById('file-input').click()" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0" title="Adjuntar archivo">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
                 </svg>
             </button>
 
-            <!-- Textarea auto-expandible -->
-            <textarea
-                id="user-input"
-                rows="1"
-                placeholder="Pregúntale a Paul..."
-                autocomplete="off"
-                class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-[16px] focus:outline-none py-2 px-1 min-w-0"
-            ></textarea>
+            <textarea id="user-input" rows="1" placeholder="Pregúntale a Paul..." autocomplete="off" class="flex-1 bg-transparent text-[var(--text-main)] placeholder-[var(--text-secondary)] text-[16px] focus:outline-none py-2 px-1 min-w-0"></textarea>
 
-            <!-- Contenedor de botones derechos (Micrófono y Enviar) -->
             <div id="right-actions" class="flex items-center gap-1.5 flex-shrink-0">
-                <button
-                    type="button"
-                    class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0"
-                    title="Dictado por voz"
-                >
+                <button type="button" class="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center flex-shrink-0" title="Dictado por voz">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
                     </svg>
                 </button>
 
-                <button
-                    type="submit"
-                    id="send-btn"
-                    class="bg-blue-600 text-white dark:bg-[#1a3a6e] dark:text-blue-200 hover:opacity-90 w-10 h-10 rounded-full transition flex items-center justify-center flex-shrink-0"
-                >
-                    <!-- Flecha hacia arriba estilo Gemini (Foto 1) -->
+                <button type="submit" id="send-btn" class="bg-blue-600 text-white dark:bg-[#1a3a6e] dark:text-blue-200 hover:opacity-90 w-10 h-10 rounded-full transition flex items-center justify-center flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6"></path>
                     </svg>
@@ -445,38 +407,34 @@
         const historyList = document.getElementById("history-list");
 
         let attachedFile = null;
-
         let chatHistory = JSON.parse(localStorage.getItem('paul_chat_history')) || [];
         let sessions = JSON.parse(localStorage.getItem('paul_sessions')) || [];
 
-        // --- AUTO-AJUSTE DE LA CAJA DE TEXTO (ESTILO GEMINI FOTO 1) ---
+        // Cierra los menús desplegables si se toca fuera
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.msg-dropdown').forEach(d => d.classList.add('hidden'));
+        });
+
         function adjustTextareaHeight() {
             userInput.style.height = 'auto';
-
             const textVal = userInput.value;
-
             if (!textVal) {
                 chatForm.classList.remove('multiline');
                 userInput.style.height = 'auto';
                 return;
             }
-
-            // Si el texto supera el ancho de 1 línea o tiene saltos de línea, pasa a modo expandido (Foto 1)
             const singleLineThreshold = 44;
             if (userInput.scrollHeight > singleLineThreshold || textVal.includes('\n') || textVal.length > 36) {
                 chatForm.classList.add('multiline');
             } else {
                 chatForm.classList.remove('multiline');
             }
-
-            // Recalcular la altura exacta tras aplicar el ancho completo
             userInput.style.height = 'auto';
             userInput.style.height = Math.min(userInput.scrollHeight, 160) + 'px';
         }
 
         userInput.addEventListener('input', adjustTextareaHeight);
 
-        // En ordenador: Enter envía, Shift+Enter hace salto de línea
         userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 768) {
                 e.preventDefault();
@@ -484,7 +442,6 @@
             }
         });
 
-        // --- CONTROL DEL SCROLL AUTOMÁTICO ---
         let userInteracted = false;
         let touchStartY = 0;
         let lastTouchY = 0;
@@ -495,8 +452,7 @@
         updateHistoryDrawerList();
 
         function isScrolledToBottom() {
-            return chatContainer.scrollHeight - chatContainer.scrollTop
-                <= chatContainer.clientHeight + 50;
+            return chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 50;
         }
 
         function keepChatAtBottom() {
@@ -507,9 +463,7 @@
 
         chatContainer.addEventListener('wheel', (e) => {
             manualScrollGesture = true;
-            if (e.deltaY < 0) {
-                userInteracted = true;
-            }
+            if (e.deltaY < 0) userInteracted = true;
         }, { passive: true });
 
         chatContainer.addEventListener('touchstart', (e) => {
@@ -522,9 +476,7 @@
             const y = e.touches[0].clientY;
             if (Math.abs(y - touchStartY) > 8) {
                 manualScrollGesture = true;
-                if (y > lastTouchY && !isScrolledToBottom()) {
-                    userInteracted = true;
-                }
+                if (y > lastTouchY && !isScrolledToBottom()) userInteracted = true;
             }
             lastTouchY = y;
         }, { passive: true });
@@ -538,42 +490,24 @@
         }, { passive: true });
 
         chatContainer.addEventListener('touchend', () => {
-            if (isScrolledToBottom()) {
-                userInteracted = false;
-            }
+            if (isScrolledToBottom()) userInteracted = false;
             manualScrollGesture = false;
         }, { passive: true });
 
-        chatContainer.addEventListener('touchcancel', () => {
-            if (isScrolledToBottom()) {
-                userInteracted = false;
-            }
-            manualScrollGesture = false;
-        }, { passive: true });
-
-        // --- CONFIGURACIÓN DE API KEY ---
         function configureKeys() {
             const currentKey = localStorage.getItem('paul_groq_key') || '';
-
-            const groqKey = prompt(
-                "Ingresa tu API Key de Groq (empieza con gsk_):",
-                currentKey
-            );
-
+            const groqKey = prompt("Ingresa tu API Key de Groq (empieza con gsk_):", currentKey);
             if (groqKey !== null) {
                 const cleanKey = groqKey.trim();
-
                 if (cleanKey === '') {
                     localStorage.removeItem('paul_groq_key');
                     alert("Se ha borrado la llave guardada.");
                     return;
                 }
-
                 if (!cleanKey.startsWith('gsk_')) {
                     alert("⚠️ Una clave de Groq válida debe empezar con 'gsk_'. Por favor verifica tu llave.");
                     return;
                 }
-
                 localStorage.setItem('paul_groq_key', cleanKey);
                 alert("¡Llave de Groq guardada correctamente!");
             }
@@ -581,7 +515,6 @@
 
         function checkKeysState() {
             const groqKey = localStorage.getItem('paul_groq_key');
-
             if (!groqKey || groqKey.trim() === '') {
                 setTimeout(() => {
                     alert("⚠️ Asegúrate de configurar tu API Key de Groq tocando el menú de tres puntos superior derecho.");
@@ -589,16 +522,10 @@
             }
         }
 
-        // --- MANEJO DEL TEMA ---
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
         function updateThemeColor(e) {
-            document.getElementById('theme-color-meta').setAttribute(
-                'content',
-                e.matches ? '#131314' : '#ffffff'
-            );
+            document.getElementById('theme-color-meta').setAttribute('content', e.matches ? '#131314' : '#ffffff');
         }
-
         darkModeMediaQuery.addEventListener('change', updateThemeColor);
         updateThemeColor(darkModeMediaQuery);
 
@@ -607,17 +534,12 @@
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 attachedFile = e.target.files[0];
-
                 fileIndicator.innerText = `📎 Adjunto: ${attachedFile.name}`;
                 fileIndicator.classList.remove('hidden');
-
-                setTimeout(() => {
-                    fileIndicator.classList.add('hidden');
-                }, 3000);
+                setTimeout(() => { fileIndicator.classList.add('hidden'); }, 3000);
             }
         });
 
-        // --- HISTORIAL Y SESIONES ---
         function toggleHistoryDrawer() {
             historyDrawer.classList.toggle('hidden');
             updateHistoryDrawerList();
@@ -625,88 +547,58 @@
 
         function updateHistoryDrawerList() {
             historyList.innerHTML = '';
-
             if (chatHistory.length > 0) {
                 const currentSessionBtn = document.createElement('div');
-
-                currentSessionBtn.className =
-                    "p-3 rounded-xl bg-black/5 dark:bg-white/5 cursor-pointer text-sm font-medium truncate flex items-center justify-between";
-
+                currentSessionBtn.className = "p-3 rounded-xl bg-black/5 dark:bg-white/5 cursor-pointer text-sm font-medium truncate flex items-center justify-between";
                 const firstUserMsg = chatHistory.find(m => m.role === 'user');
-
-                currentSessionBtn.innerHTML =
-                    `<span>💬 ${firstUserMsg ? firstUserMsg.content.substring(0, 25) + '...' : 'Chat actual'}</span> <span class="text-xs text-blue-500">Activo</span>`;
-
+                currentSessionBtn.innerHTML = `<span>💬 ${firstUserMsg ? firstUserMsg.content.substring(0, 25) + '...' : 'Chat actual'}</span> <span class="text-xs text-blue-500">Activo</span>`;
                 historyList.appendChild(currentSessionBtn);
             }
-
             if (sessions.length === 0 && chatHistory.length === 0) {
-                historyList.innerHTML =
-                    `<p class="text-xs text-[var(--text-secondary)] text-center py-4">No hay chats guardados</p>`;
+                historyList.innerHTML = `<p class="text-xs text-[var(--text-secondary)] text-center py-4">No hay chats guardados</p>`;
                 return;
             }
-
             sessions.forEach((session, idx) => {
                 const item = document.createElement('div');
-
-                item.className =
-                    "p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer text-sm truncate flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--text-main)] transition";
-
+                item.className = "p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer text-sm truncate flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--text-main)] transition";
                 item.innerHTML = `<span>🗨️ ${session.title || 'Conversación anterior'}</span>`;
                 item.onclick = () => loadSession(idx);
-
                 historyList.appendChild(item);
             });
         }
 
-        function startNewChat() {
+        // LÓGICA DE NUEVO CHAT CORREGIDA
+        function startNewChat(fromDrawer = false) {
             if (chatHistory.length > 0) {
                 const firstMsg = chatHistory.find(m => m.role === 'user');
-
-                const title = firstMsg
-                    ? firstMsg.content.substring(0, 25) + '...'
-                    : 'Chat anterior';
-
-                sessions.unshift({
-                    title,
-                    history: [...chatHistory]
-                });
-
+                const title = firstMsg ? firstMsg.content.substring(0, 25) + '...' : 'Chat anterior';
+                sessions.unshift({ title, history: [...chatHistory] });
                 localStorage.setItem('paul_sessions', JSON.stringify(sessions));
             }
-
             localStorage.removeItem('paul_chat_history');
             chatHistory = [];
             userInteracted = false;
             chatContainer.innerHTML = '';
-
             appendMessage('bot', '¡Hola! ¿En qué te puedo ayudar hoy?', null, false, null);
-            toggleHistoryDrawer();
+            
+            // Solo cierra el menú lateral si la acción provino desde adentro del menú
+            if (fromDrawer) {
+                toggleHistoryDrawer();
+            }
         }
 
         function loadSession(idx) {
             const session = sessions[idx];
-
             if (session) {
                 if (chatHistory.length > 0) {
                     const firstMsg = chatHistory.find(m => m.role === 'user');
-
-                    const title = firstMsg
-                        ? firstMsg.content.substring(0, 25) + '...'
-                        : 'Chat anterior';
-
-                    sessions.unshift({
-                        title,
-                        history: [...chatHistory]
-                    });
+                    const title = firstMsg ? firstMsg.content.substring(0, 25) + '...' : 'Chat anterior';
+                    sessions.unshift({ title, history: [...chatHistory] });
                 }
-
                 chatHistory = [...session.history];
                 sessions.splice(idx, 1);
-
                 localStorage.setItem('paul_sessions', JSON.stringify(sessions));
                 localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
-
                 userInteracted = false;
                 renderStoredHistory();
                 toggleHistoryDrawer();
@@ -715,7 +607,6 @@
 
         function renderStoredHistory() {
             chatContainer.innerHTML = '';
-
             if (chatHistory.length === 0) {
                 appendMessage('bot', '¡Hola! ¿En qué te puedo ayudar hoy?', null, false, null);
             } else {
@@ -725,21 +616,14 @@
             }
         }
 
-        // --- FORMATEADOR CON SOPORTE DE YOUTUBE ---
         function formatMarkdownWithYouTube(rawText) {
             if (!rawText) return '';
-
             let ytQuery = null;
-
             const ytMatch = rawText.match(/\[YT:\s*(.+?)\]/i);
             let cleanText = rawText.replace(/\[YT:\s*(.+?)\]/gi, '').trim();
-
-            if (ytMatch && ytMatch[1]) {
-                ytQuery = ytMatch[1].trim();
-            }
+            if (ytMatch && ytMatch[1]) ytQuery = ytMatch[1].trim();
 
             let html = marked.parse(cleanText);
-
             const ytUrlRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
             html = html.replace(ytUrlRegex, (match, videoId) => {
                 return `
@@ -747,75 +631,101 @@
                     <iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>`;
             });
-
             if (ytQuery) {
                 const searchUrl = `https://m.youtube.com/results?search_query=${encodeURIComponent(ytQuery)}`;
                 html += `
                 <a href="${searchUrl}" target="_blank" rel="noopener noreferrer" class="yt-card">
                     <div class="yt-icon-box">
-                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
+                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="text-xs font-semibold text-red-500 uppercase tracking-wider">YouTube • Video recomendado</div>
                         <div class="text-sm font-medium truncate mt-0.5">${ytQuery}</div>
                         <div class="text-xs text-[var(--text-secondary)] mt-0.5">Toca para ver el video en YouTube</div>
                     </div>
-                    <svg class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
-                    </svg>
+                    <svg class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
                 </a>`;
             }
-
             return html;
+        }
+
+        // Función para exportar a PDF (Usa html2pdf)
+        function exportBubbleToPDF(bubbleElement) {
+            const opt = {
+                margin:       10,
+                filename:     'Respuesta_Paul.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(bubbleElement).save();
+        }
+
+        // Función para leer el texto en voz alta
+        function playAudio(text, btnElement) {
+            const synth = window.speechSynthesis;
+            if (synth.speaking) {
+                synth.cancel();
+                document.querySelectorAll('.audio-btn-icon').forEach(icon => {
+                    icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
+                    icon.classList.remove('text-blue-500');
+                    icon.parentElement.dataset.playing = "false";
+                });
+                if (btnElement.dataset.playing === "true") {
+                    btnElement.dataset.playing = "false";
+                    return;
+                }
+            }
+
+            btnElement.dataset.playing = "true";
+            const iconSvg = btnElement.querySelector('.audio-btn-icon');
+            iconSvg.classList.add('text-blue-500');
+            iconSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>`;
+
+            const cleanText = text.replace(/\[YT:\s*(.+?)\]/gi, '').replace(/[*#]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'es-ES';
+            utterance.onend = () => {
+                btnElement.dataset.playing = "false";
+                iconSvg.classList.remove('text-blue-500');
+                iconSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
+            };
+            synth.speak(utterance);
         }
 
         // --- RENDERIZADO DE MENSAJES ---
         function appendMessage(sender, text, fileObj = null, isTyping = false, historyIndex = null) {
             const isUser = sender === 'user' || sender === 'system';
-
             if (sender === 'system') return;
 
             const row = document.createElement('div');
-
-            row.className =
-                `flex w-full max-w-full ${isUser ? 'justify-end' : 'justify-start'}`;
+            row.className = `flex w-full max-w-full ${isUser ? 'justify-end' : 'justify-start'}`;
 
             const bubbleContainer = document.createElement('div');
-
-            bubbleContainer.className =
-                `flex flex-col ${isUser ? 'items-end max-w-[85%]' : 'items-start w-full'}`;
+            bubbleContainer.className = `flex flex-col ${isUser ? 'items-end max-w-[85%]' : 'items-start w-full'}`;
 
             const bubble = document.createElement('div');
-
-            bubble.className =
-                `markdown-content ${isUser ? 'gemini-bubble-user' : 'gemini-bubble-ai'}`;
+            bubble.className = `markdown-content ${isUser ? 'gemini-bubble-user' : 'gemini-bubble-ai'}`;
 
             if (fileObj) {
                 if (fileObj.type.startsWith('image/')) {
                     const img = document.createElement('img');
-
                     img.src = URL.createObjectURL(fileObj);
                     img.className = "max-w-[200px] rounded-xl mb-2 shadow-sm";
-
                     bubble.appendChild(img);
                 } else {
                     const fileTag = document.createElement('div');
-
                     fileTag.className = "text-xs opacity-80 mb-1 font-semibold";
                     fileTag.innerText = `📄 Archivo: ${fileObj.name}`;
-
                     bubble.appendChild(fileTag);
                 }
             }
 
             const textNode = document.createElement('div');
-            textNode.className = "overflow-x-auto";
+            textNode.className = "overflow-x-auto w-full";
 
             if (isTyping) {
-                textNode.innerHTML =
-                    `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
+                textNode.innerHTML = `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
             } else {
                 textNode.innerHTML = isUser ? marked.parse(text) : formatMarkdownWithYouTube(text);
             }
@@ -826,91 +736,115 @@
                 bubbleContainer.appendChild(bubble);
             } else {
                 const aiTextWrapper = document.createElement('div');
-
                 aiTextWrapper.className = "w-full";
                 aiTextWrapper.appendChild(bubble);
-
                 bubbleContainer.appendChild(aiTextWrapper);
             }
 
             if (!isTyping) {
                 const actionsBar = document.createElement('div');
-
-                actionsBar.className =
-                    `flex items-center gap-1 text-[var(--text-secondary)] ${isUser ? 'mt-1' : 'mt-2'} px-1`;
+                actionsBar.className = `flex items-center gap-1 text-[var(--text-secondary)] ${isUser ? 'mt-1' : 'mt-2'} px-1`;
 
                 if (isUser && historyIndex !== null) {
                     const editBtn = document.createElement('button');
-
-                    editBtn.className =
-                        "hover:text-[var(--text-main)] transition p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
-
+                    editBtn.className = "hover:text-[var(--text-main)] transition p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     editBtn.title = "Editar mensaje";
-
-                    editBtn.innerHTML =
-                        `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`;
-
+                    editBtn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`;
                     editBtn.onclick = () => editMessage(historyIndex);
                     actionsBar.appendChild(editBtn);
 
                 } else if (!isUser) {
+                    
+                    // BOTÓN 1: COPIAR
                     const copyBtn = document.createElement('button');
-
-                    copyBtn.className =
-                        "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
-
+                    copyBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
                     copyBtn.title = "Copiar";
-
-                    copyBtn.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
-
+                    copyBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
                     copyBtn.onclick = async () => {
                         try {
                             await navigator.clipboard.writeText(text.replace(/\[YT:\s*(.+?)\]/gi, '').trim());
-
-                            copyBtn.innerHTML =
-                                `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>`;
-
+                            copyBtn.innerHTML = `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>`;
                             setTimeout(() => {
-                                copyBtn.innerHTML =
-                                    `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
+                                copyBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>`;
                             }, 2000);
-                        } catch (error) {
-                            console.error("No se pudo copiar el mensaje:", error);
-                        }
+                        } catch (error) { console.error(error); }
                     };
-
                     actionsBar.appendChild(copyBtn);
 
-                    const thumbsUp = document.createElement('button');
+                    // BOTÓN 2: REFRESCAR (Regenerar Respuesta)
+                    const refreshBtn = document.createElement('button');
+                    refreshBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    refreshBtn.title = "Regenerar respuesta";
+                    refreshBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>`;
+                    refreshBtn.onclick = () => {
+                        let targetIndex = historyIndex !== null ? historyIndex : (chatHistory.length - 1);
+                        if(chatHistory[targetIndex] && chatHistory[targetIndex].role === 'assistant') {
+                            const userMsg = chatHistory[targetIndex - 1].content;
+                            chatHistory = chatHistory.slice(0, targetIndex - 1);
+                            localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
+                            renderStoredHistory();
+                            processAndSend(userMsg, null);
+                        }
+                    };
+                    actionsBar.appendChild(refreshBtn);
 
-                    thumbsUp.className =
-                        "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    // BOTÓN 3: AUDIO (Leer en voz alta)
+                    const audioBtn = document.createElement('button');
+                    audioBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    audioBtn.title = "Leer respuesta";
+                    audioBtn.dataset.playing = "false";
+                    audioBtn.innerHTML = `<svg class="w-4 h-4 audio-btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>`;
+                    audioBtn.onclick = () => playAudio(text, audioBtn);
+                    actionsBar.appendChild(audioBtn);
 
-                    thumbsUp.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714.211 1.412.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>`;
-
-                    actionsBar.appendChild(thumbsUp);
-
-                    const thumbsDown = document.createElement('button');
-
-                    thumbsDown.className =
-                        "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
-
-                    thumbsDown.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904-.212-1.413-.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path></svg>`;
-
-                    actionsBar.appendChild(thumbsDown);
+                    // BOTÓN 4: MENÚ DROPDOWN (PDF, Extender, Acortar)
+                    const menuContainer = document.createElement('div');
+                    menuContainer.className = "relative inline-block";
 
                     const moreBtn = document.createElement('button');
+                    moreBtn.className = "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    moreBtn.title = "Más opciones";
+                    moreBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>`;
 
-                    moreBtn.className =
-                        "hover:text-[var(--text-main)] transition p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5";
+                    const dropdown = document.createElement('div');
+                    dropdown.className = "hidden msg-dropdown absolute bottom-[120%] left-0 mb-1 w-48 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl shadow-lg z-50 overflow-hidden text-sm font-medium";
+                    dropdown.innerHTML = `
+                        <button class="w-full text-left px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center gap-2">📄 Exportar a PDF</button>
+                        <button class="w-full text-left px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center gap-2 border-t border-[var(--border-color)]">➕ Extender respuesta</button>
+                        <button class="w-full text-left px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center gap-2 border-t border-[var(--border-color)]">➖ Acortar respuesta</button>
+                    `;
 
-                    moreBtn.innerHTML =
-                        `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>`;
+                    const [pdfBtn, extBtn, shortBtn] = dropdown.querySelectorAll('button');
 
-                    actionsBar.appendChild(moreBtn);
+                    pdfBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        dropdown.classList.add('hidden');
+                        exportBubbleToPDF(bubble);
+                    };
+
+                    extBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        dropdown.classList.add('hidden');
+                        processAndSend("Por favor, extiende tu respuesta anterior añadiendo muchos más detalles e información profunda.", null);
+                    };
+
+                    shortBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        dropdown.classList.add('hidden');
+                        processAndSend("Por favor, resume tu respuesta anterior para que sea mucho más corta y concisa.", null);
+                    };
+
+                    moreBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        document.querySelectorAll('.msg-dropdown').forEach(d => {
+                            if (d !== dropdown) d.classList.add('hidden');
+                        });
+                        dropdown.classList.toggle('hidden');
+                    };
+
+                    menuContainer.appendChild(moreBtn);
+                    menuContainer.appendChild(dropdown);
+                    actionsBar.appendChild(menuContainer);
                 }
 
                 bubbleContainer.appendChild(actionsBar);
@@ -918,82 +852,52 @@
 
             if (!isUser && !isTyping) {
                 const disclaimer = document.createElement('div');
-
-                disclaimer.className =
-                    "text-[11px] text-[var(--text-secondary)] mt-1 px-1 opacity-80";
-
+                disclaimer.className = "text-[11px] text-[var(--text-secondary)] mt-1 px-1 opacity-80";
                 disclaimer.innerText = "Paul es una IA y puede cometer errores.";
-
                 bubbleContainer.appendChild(disclaimer);
             }
 
             row.appendChild(bubbleContainer);
             chatContainer.appendChild(row);
 
-            if (!isTyping) {
-                keepChatAtBottom();
-            }
-
+            if (!isTyping) keepChatAtBottom();
             return bubble;
         }
 
         async function editMessage(index) {
             const oldMsg = chatHistory[index];
-
             if (!oldMsg || oldMsg.role !== 'user') return;
-
             const newText = prompt("Edita tu mensaje:", oldMsg.content);
-
             if (newText === null || newText.trim() === '') return;
-
             chatHistory = chatHistory.slice(0, index);
-
-            localStorage.setItem(
-                'paul_chat_history',
-                JSON.stringify(chatHistory)
-            );
-
+            localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
             renderStoredHistory();
-
             await processAndSend(newText.trim(), null);
         }
 
         chatForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-
             const text = userInput.value.trim();
             const fileToSend = attachedFile;
 
             if (!text && !fileToSend) return;
 
             userInput.value = "";
-            adjustTextareaHeight(); // Regresa la caja a su tamaño original de 1 línea al enviar
+            adjustTextareaHeight();
             attachedFile = null;
-
             fileIndicator.classList.add('hidden');
             fileInput.value = "";
 
             let messageText = text;
-
-            if (fileToSend) {
-                messageText += ` [Archivo adjunto: ${fileToSend.name}]`;
-            }
+            if (fileToSend) messageText += ` [Archivo adjunto: ${fileToSend.name}]`;
 
             await processAndSend(messageText, fileToSend);
         });
 
         // --- PROCESAMIENTO PRINCIPAL DE LA IA ---
         async function processAndSend(messageText, fileToSend) {
-            chatHistory.push({
-                role: "user",
-                content: messageText
-            });
-
-            localStorage.setItem(
-                'paul_chat_history',
-                JSON.stringify(chatHistory)
-            );
-
+            chatHistory.push({ role: "user", content: messageText });
+            localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
             userInteracted = false;
             renderStoredHistory();
 
@@ -1002,38 +906,24 @@
 
             try {
                 const apiKey = localStorage.getItem('paul_groq_key');
-
-                if (!apiKey) {
-                    throw new Error(
-                        "Falta configurar tu API Key de Groq. Toca el menú de tres puntos en la parte superior derecha."
-                    );
-                }
+                if (!apiKey) throw new Error("Falta configurar tu API Key de Groq. Toca el menú de tres puntos en la parte superior derecha.");
 
                 const systemPrompt = `Eres Paul, un asistente personal útil, directo, amigable y con un tono conversacional similar a Gemini.
-
 REGLAS DE FORMATO OBLIGATORIAS:
-1. Para estructurar tus respuestas, SIEMPRE usa títulos de nivel 2 o 3 con formato Markdown (ejemplo: '## 📸 Título de sección' o '### ✍️ Otro título').
+1. Para estructurar tus respuestas, SIEMPRE usa títulos de nivel 2 o 3 con formato Markdown.
 2. Acompaña cada título con un emoji al inicio que represente la sección.
-3. Usa viñetas ('* ') para enumerar puntos dentro de las secciones. Evita usar listas numeradas (1. 2. 3.) a menos que sea estrictamente necesario (ej. pasos a seguir).
+3. Usa viñetas ('* ') para enumerar puntos dentro de las secciones.
 4. Deja espacio limpio entre párrafos para que la lectura sea cómoda.
 5. Usa **negritas** solo para resaltar palabras clave dentro de las viñetas.
 6. No uses introducciones robóticas. Sé cálido, colaborativo y directo.
 7. VIDEO DE YOUTUBE OBLIGATORIO EN TEMAS INFORMATIVOS: Cuando el usuario pregunte sobre historia, ciencia, tutoriales, tecnología, cultura o cualquier tema explicativo, incluye SIEMPRE al final de tu respuesta una línea con el formato exacto: [YT: título específico del video a buscar en YouTube]. Ejemplo: [YT: Cómo fue la conquista del Imperio Inca documental]`;
 
                 const apiMessages = [
-                    {
-                        role: "system",
-                        content: systemPrompt
-                    },
-                    ...chatHistory.map(m => ({
-                        role: m.role,
-                        content: m.content
-                    }))
+                    { role: "system", content: systemPrompt },
+                    ...chatHistory.map(m => ({ role: m.role, content: m.content }))
                 ];
 
-                const apiUrl =
-                    "https://api.groq.com/openai/v1/chat/completions";
-
+                const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
                 const headers = {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
@@ -1053,10 +943,7 @@ REGLAS DE FORMATO OBLIGATORIAS:
 
                 if (!response.ok) {
                     const errData = await response.json();
-
-                    throw new Error(
-                        errData.error?.message || "Error en la red"
-                    );
+                    throw new Error(errData.error?.message || "Error en la red");
                 }
 
                 const reader = response.body.getReader();
@@ -1065,56 +952,33 @@ REGLAS DE FORMATO OBLIGATORIAS:
 
                 while (true) {
                     const { done, value } = await reader.read();
-
                     if (done) break;
 
-                    const chunk = decoder.decode(value, {
-                        stream: true
-                    });
-
+                    const chunk = decoder.decode(value, { stream: true });
                     const lines = chunk.split("\n");
 
                     for (const line of lines) {
                         const trimmed = line.trim();
-
                         if (!trimmed.startsWith("data: ")) continue;
-
                         const jsonStr = trimmed.replace("data: ", "");
-
                         if (jsonStr === "[DONE]") continue;
 
                         try {
                             const parsed = JSON.parse(jsonStr);
-
-                            const content =
-                                parsed.choices[0]?.delta?.content || "";
-
+                            const content = parsed.choices[0]?.delta?.content || "";
                             if (content) {
                                 fullResponse += content;
-
-                                textContainer.innerHTML =
-                                    formatMarkdownWithYouTube(fullResponse);
-
-                                requestAnimationFrame(() => {
-                                    keepChatAtBottom();
-                                });
+                                textContainer.innerHTML = formatMarkdownWithYouTube(fullResponse);
+                                requestAnimationFrame(() => keepChatAtBottom());
                             }
-                        } catch (e) {
-                            // Ignora fragmentos que no sean JSON válido.
-                        }
+                        } catch (e) { }
                     }
                 }
 
-                chatHistory.push({
-                    role: "assistant",
-                    content: fullResponse
-                });
-
-                localStorage.setItem(
-                    'paul_chat_history',
-                    JSON.stringify(chatHistory)
-                );
-
+                chatHistory.push({ role: "assistant", content: fullResponse });
+                localStorage.setItem('paul_chat_history', JSON.stringify(chatHistory));
+                
+                // Vuelve a renderizar para añadir de inmediato los botones de audio, refrescar, pdf, etc.
                 renderStoredHistory();
 
             } catch (err) {
